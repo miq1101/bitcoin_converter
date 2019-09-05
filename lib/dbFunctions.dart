@@ -9,43 +9,41 @@ import 'package:sqflite/sqlite_api.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = new DatabaseHelper.internal();
-
   DatabaseHelper.internal();
-
   factory DatabaseHelper() => _instance;
-
+  int i = 1;
   String path;
+  Map<String, dynamic> countryName;
   static Database _db;
-
 
   Future<Database> get database async {
     if (_db != null) {
       return _db;
     }
     _db = await initDB();
-    await _insertAllCriptoInfo();
+    await makeGetRequestForCurrencyName();
     return _db;
   }
 
-//  Future<Database> get database async {
-//    if (_database != null) return _database;
-//
-//    _database = await initDB();
-//    return _database;
-//  }
-
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    path = join(documentsDirectory.path, "TestDB1.db");
+    path = join(documentsDirectory.path, "TestDB4.db");
     print(path.toString() + '       aaaaaaaaaaaa');
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
           await db.execute(
-              'CREATE TABLE Criptos (id SERIAL PRIMARY KEY, moneyType  TEXT NOT NULL UNIQUE, value REAL NOT NULL,flagPath TEXT NOT NULL)');
+              'CREATE TABLE Criptos (id SERIAL PRIMARY KEY, countryName TEXT NOT NULL UNIQUE, moneyType  TEXT NOT NULL UNIQUE, value REAL NOT NULL)');
         });
   }
 
-  createMap(num value) {
+  createMapforInsert(int id, String moneyType) {
+    return {
+      "id": id,
+      "moneyType": moneyType,
+    };
+  }
+
+  createMapforUpdate(num value) {
     return {
       "value": value,
     };
@@ -62,18 +60,20 @@ class DatabaseHelper {
     return res;
   }
 
-  getCripto(String moneyType) async {
+  getCriptoInfo(int id, String columnName) async {
     final db = await database;
-    var res = await db
-        .query("Criptos", where: "moneyType = ?", whereArgs: [moneyType]);
-    return res.isNotEmpty ? res : Null;
-  }
+    var res = await db.query("Criptos", where: "id = ?", whereArgs: [id]);
+    if (columnName == "countryName") {
+      return res.isNotEmpty ? res[0]["countryName"] : Null;
+    }
 
-  getCriptoId(String moneyType) async {
-    final db = await database;
-    var res = await db
-        .query("Criptos", where: "moneyType = ?", whereArgs: [moneyType]);
-    return res.isNotEmpty ? res[0]['id'] : Null;
+    if (columnName == "moneyType") {
+      return res.isNotEmpty ? res[0]["moneyType"] : Null;
+    }
+
+    if (columnName == "value") {
+      return res.isNotEmpty ? res[0]["value"] : Null;
+    }
   }
 
   getAllCripto() async {
@@ -83,16 +83,24 @@ class DatabaseHelper {
     return res.isNotEmpty ? res : [];
   }
 
-  updateCripto(int id, Map <String, num> value) async {
+  getRawCount() async {
+    final db = await database;
+    int res = Sqflite.firstIntValue(
+        await db.rawQuery("SELECT COUNT(id) from Criptos"));
+
+    return res;
+  }
+
+  updateCripto(String moneyType, Map<String, num> value) async {
     final db = await database;
     var res = await db.update("Criptos", value,
-        where: "id = ?", whereArgs: [id]);
+        where: "moneyType = ?", whereArgs: [moneyType]);
     return res;
   }
 
   deleteCripto(double id) async {
     final db = await database;
-    db.delete("Criptos", where: "value = ?", whereArgs: [id]);
+    db.delete("Criptos", where: "id = ?", whereArgs: [id]);
   }
 
   deleteAll() async {
@@ -100,79 +108,98 @@ class DatabaseHelper {
     db.rawDelete("Delete * from Criptos");
   }
 
-  makeGetRequest(String currencyCode) async {
-    //String currencyCode = 'USD,JPY,EUR,AMD,ARS,AUD,BRL,CAD,CNY,DKK,GEL,LTL,AED,KRW,QAR,RUD,SGD,SEK,CHF,UAH,GBP';
+  makeGetRequestForUpdateCall(List list) async {
+    String currencyCode = '';
+    int count = list.length;
+    for (int i = 0; i < count; i++) {
+      currencyCode = currencyCode + list[i] + ',';
+    }
+    currencyCode = currencyCode.substring(0, currencyCode.length - 1);
+    await makeGetRequestForUpdate(currencyCode);
+  }
+
+  makeGetRequestForUpdate(String currencyCode) async {
     String apiKey =
         'api_key=775ee409575020e8186ebd2339869437c62b648c06bd63d2baf2e8f794bebe00';
-    // make GET request
     String url =
         'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=${currencyCode}&${apiKey}';
     Response response = await get(url);
     if (response.statusCode == 200) {
-      //all = MoneyType.fromJson(json.decode(response.body));
-//       Map<String, dynamic> decoded = json.decode(response.body);
-//       for (var colour in decoded.keys) {
-//         print(colour);
-//
-//       }
-      print(response.body);
-      // return all;
+      Map<String, dynamic> decoded = json.decode(response.body);
+      await updateAllCriptoInfo(decoded);
+    } else {
+      throw Exception(response.statusCode);
+    }
+  }
+
+  makeGetRequestCurrencyInfo(String currencyCode) async {
+    String apiKey =
+        'api_key=775ee409575020e8186ebd2339869437c62b648c06bd63d2baf2e8f794bebe00';
+    String url =
+        'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=${currencyCode}&${apiKey}';
+    Response response = await get(url);
+    if (response.statusCode == 200) {
+      Map<String, dynamic> decoded = json.decode(response.body);
+      await insertDBAllTables(decoded);
     } else {
       throw Exception(response.statusCode);
     }
   }
 
   makeGetRequestForCurrencyName() async {
-    List allCurrencyNames = [];
-    String currencyCode = '';
-    String currencyCode1 = '';
-    String currencyCode2 = '';
-    int a = 0;
-    String url =
-        'https://openexchangerates.org/api/currencies.json';
+    String url = 'https://openexchangerates.org/api/currencies.json';
     Response response = await get(url);
     if (response.statusCode == 200) {
-      //all = MoneyType.fromJson(json.decode(response.body));
       Map<String, dynamic> decoded = json.decode(response.body);
-      for (var currencyName in decoded.keys) {
-        //currencyCode =currencyCode + currencyName  + ',' ;
-        allCurrencyNames.add(currencyName);
-        a++;
-      }
-
-      for (int i = 0; i < (a ~/ 3); i++) {
-        currencyCode = currencyCode + allCurrencyNames[i] + ',';
-      }
-      currencyCode = currencyCode.substring(0, currencyCode.length - 1);
-      print(currencyCode + "                 111111111111111");
-      await makeGetRequest(currencyCode);
-      for (int i = (a ~/ 3); i < 2 * (a / ~3); i++) {
-        currencyCode1 = currencyCode1 + allCurrencyNames[i] + ',';
-      }
-      //currencyCode1 = currencyCode1.substring(0,currencyCode1.length-1);
-      print(currencyCode + "     22222222222222222222");
-
-      await makeGetRequest(currencyCode1);
-      for (int i = 2 * (a ~/ 3) + (a % 3); i < a; i++) {
-        currencyCode2 = currencyCode2 + allCurrencyNames[i] + ',';
-      }
-      currencyCode2 = currencyCode2.substring(0, currencyCode2.length - 1);
-      print(currencyCode2 + "3333333333333333333333333");
-
-      await makeGetRequest(currencyCode2);
-
-
-      print(a);
+      countryName = decoded;
+      await makeGetRequestCurrencyInfoCall(decoded);
     } else {
       throw Exception(response.statusCode);
     }
   }
 
-  _insertAllCriptoInfo() async {
+  makeGetRequestCurrencyInfoCall(Map<String, dynamic> decoded) async {
+    List allCurrencyNames = [];
+    String currencyCode = '';
+    String currencyCode1 = '';
+
+    for (var currencyName in decoded.keys) {
+      allCurrencyNames.add(currencyName);
+    }
+    int count = allCurrencyNames.length;
+    for (int i = 0; i < (count ~/ 2); i++) {
+      currencyCode = currencyCode + allCurrencyNames[i] + ',';
+    }
+    currencyCode = currencyCode.substring(0, currencyCode.length - 1);
+    await makeGetRequestCurrencyInfo(currencyCode);
+    for (int i = (count ~/ 2) + (count % 2); i < count; i++) {
+      currencyCode1 = currencyCode1 + allCurrencyNames[i] + ',';
+    }
+    currencyCode1 = currencyCode1.substring(0, currencyCode1.length - 1);
+
+    await makeGetRequestCurrencyInfo(currencyCode1);
   }
 
-  updateAllCriptoInfo() async {
+  insertDBAllTables(Map<String, dynamic> decoded) async {
+    List allCurrencyNames = [];
+    for (var currencyName in decoded.keys) {
+      allCurrencyNames.add(currencyName);
+    }
+    for (String everyCurrency in allCurrencyNames) {
+      // print(decoded[everyCurrency]);
+      Cripto criptoCurrency = Cripto(
+          id: i,
+          countryName: countryName[everyCurrency],
+          moneyType: everyCurrency,
+          value: decoded[everyCurrency]);
+      await newCripto(criptoCurrency);
+      i++;
+    }
+  }
 
-
+  updateAllCriptoInfo(Map<String, dynamic> decoded) async {
+    for (String everyCurrency in decoded.keys) {
+      updateCripto(everyCurrency, createMapforUpdate(decoded[everyCurrency]));
+    }
   }
 }
