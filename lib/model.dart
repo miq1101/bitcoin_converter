@@ -14,21 +14,20 @@ class Model {
     _net = NetWorking();
   }
   getDB() async {
-
     final dataBase = await _db.database;
     int rowCount = await _db.getRawCount();
     if (rowCount == 0) {
       await getCurrencyAndCountryName();
       return dataBase;
     }
-    await uoDateDB();
+    await upDateDB();
     return dataBase;
   }
 
   getCurrencyAndCountryName() async {
     String currencyCode = '';
     Map<String, dynamic> currensyAndCountry =
-    await _net.makeGetRequestForCurrencyName();
+        await _net.makeGetRequestForCurrencyName();
     for (var currencyCodes in currensyAndCountry.keys) {
       _allCurrencyCodes.add(currencyCodes);
     }
@@ -42,7 +41,7 @@ class Model {
 
   getCriptoCurrencyInfo(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
-    await _net.makeGetRequestCurrencyInfo(currencyCode);
+        await _net.makeGetRequestCurrencyInfo(currencyCode);
     await insertDB(criptoCurrencyInfo);
   }
 
@@ -87,7 +86,7 @@ class Model {
 
   getCriptoCurrencyInfoForUpdate(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
-    await _net.makeGetRequestCurrencyInfo(currencyCode);
+        await _net.makeGetRequestCurrencyInfo(currencyCode);
     upDateCripto(criptoCurrencyInfo);
   }
 
@@ -103,7 +102,8 @@ class Model {
           everyCurrency, createMapforUpdate(criptoCurrencyInfo[everyCurrency]));
     }
   }
-  uoDateDB() async{
+
+  upDateDB() async {
     List currencyNames = [];
     String currencyName = '';
     int rowCount = await _db.getRawCount();
@@ -116,6 +116,7 @@ class Model {
 
     await getCriptoCurrencyInfoForUpdate(currencyName);
   }
+
   getCriptoColumnInfo(int id, String columnName) async {
     return _db.getCriptoColumnInfo(id, columnName);
   }
@@ -123,9 +124,11 @@ class Model {
   getCriptoInfoViaId(int id) async {
     return await _db.getCriptoInfoViaId(id);
   }
+
   getCriptoInfoViaMoneyType(String moneyType) async {
     return _db.getCriptoInfoViaMoneyType(moneyType);
   }
+
   getAllCriptoInfo() async {
     return _db.getAllCriptoInfo();
   }
