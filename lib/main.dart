@@ -1,7 +1,6 @@
 import 'dart:core';
 
-import 'currensy.dart';
-import 'dbFunctions.dart';
+
 import 'mainScreen.dart';
 import 'package:flutter/material.dart';
 
