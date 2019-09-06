@@ -8,31 +8,27 @@ class Model {
   List _allCurrencyCodes = [];
   Map<String, dynamic> _allCountryNames;
   int id = 1;
+
   Model() {
     _db = DatabaseHelper.internal();
     _net = NetWorking();
   }
   getDB() async {
-    List currencyNames = [];
-    String currencyName = '';
+
     final dataBase = await _db.database;
     int rowCount = await _db.getRawCount();
     if (rowCount == 0) {
       await getCurrencyAndCountryName();
       return dataBase;
     }
-    currencyNames = await getCurrencynamesForURL(rowCount);
-    currencyName = cutListFirst(currencyNames.length, currencyNames);
-    await getCriptoCurrencyInfoForUpdate(currencyName);
-    currencyName = cutListSecond(currencyNames.length, currencyNames);
-    await getCriptoCurrencyInfoForUpdate(currencyName);
+    await uoDateDB();
     return dataBase;
   }
 
   getCurrencyAndCountryName() async {
     String currencyCode = '';
     Map<String, dynamic> currensyAndCountry =
-        await _net.makeGetRequestForCurrencyName();
+    await _net.makeGetRequestForCurrencyName();
     for (var currencyCodes in currensyAndCountry.keys) {
       _allCurrencyCodes.add(currencyCodes);
     }
@@ -46,7 +42,7 @@ class Model {
 
   getCriptoCurrencyInfo(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
-        await _net.makeGetRequestCurrencyInfo(currencyCode);
+    await _net.makeGetRequestCurrencyInfo(currencyCode);
     await insertDB(criptoCurrencyInfo);
   }
 
@@ -84,15 +80,15 @@ class Model {
   getCurrencynamesForURL(int count) async {
     List currencyNames = [];
     for (int i = 1; i <= count; i++) {
-      currencyNames.add(await _db.getCriptoInfo(i, "moneyType"));
+      currencyNames.add(await _db.getCriptoColumnInfo(i, "moneyType"));
     }
     return currencyNames;
   }
 
   getCriptoCurrencyInfoForUpdate(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
-        await _net.makeGetRequestCurrencyInfo(currencyCode);
-    upDateDB(criptoCurrencyInfo);
+    await _net.makeGetRequestCurrencyInfo(currencyCode);
+    upDateCripto(criptoCurrencyInfo);
   }
 
   createMapforUpdate(num value) {
@@ -101,14 +97,40 @@ class Model {
     };
   }
 
-  upDateDB(Map<String, dynamic> criptoCurrencyInfo) async {
+  upDateCripto(Map<String, dynamic> criptoCurrencyInfo) async {
     for (String everyCurrency in criptoCurrencyInfo.keys) {
       await _db.updateDB(
           everyCurrency, createMapforUpdate(criptoCurrencyInfo[everyCurrency]));
     }
   }
+  uoDateDB() async{
+    List currencyNames = [];
+    String currencyName = '';
+    int rowCount = await _db.getRawCount();
+    currencyNames = await getCurrencynamesForURL(rowCount);
+    currencyName = cutListFirst(currencyNames.length, currencyNames);
+    print(currencyName);
+    await getCriptoCurrencyInfoForUpdate(currencyName);
+    currencyName = cutListSecond(currencyNames.length, currencyNames);
+    print(currencyName);
 
-  getCripto() async {
-    return await _db.getAllCripto();
+    await getCriptoCurrencyInfoForUpdate(currencyName);
+  }
+  getCriptoColumnInfo(int id, String columnName) async {
+    return _db.getCriptoColumnInfo(id, columnName);
+  }
+
+  getCriptoInfoViaId(int id) async {
+    return await _db.getCriptoInfoViaId(id);
+  }
+  getCriptoInfoViaMoneyType(String moneyType) async {
+    return _db.getCriptoInfoViaMoneyType(moneyType);
+  }
+  getAllCriptoInfo() async {
+    return _db.getAllCriptoInfo();
+  }
+
+  getRawCount() async {
+    return _db.getRawCount();
   }
 }

@@ -45,7 +45,7 @@ class DatabaseHelper {
     return res;
   }
 
-  getCriptoInfo(int id, String columnName) async {
+  getCriptoColumnInfo(int id, String columnName) async {
     final db = await database;
     var res = await db.query("Criptos", where: "id = ?", whereArgs: [id]);
     if (columnName == "countryName") {
@@ -59,9 +59,24 @@ class DatabaseHelper {
     if (columnName == "value") {
       return res.isNotEmpty ? res[0]["value"] : Null;
     }
+    if (columnName == "flagPath") {
+      return res.isNotEmpty ? res[0]["flagPath"] : Null;
+    }
   }
 
-  getAllCripto() async {
+  getCriptoInfoViaId(int id) async {
+    final db = await database;
+    var res = await db.query("Criptos",where: "id = ?", whereArgs: [id]);
+
+    return res.isNotEmpty ? res : [];
+  }
+  getCriptoInfoViaMoneyType(String moneyType) async {
+    final db = await database;
+    var res = await db.query("Criptos",where: "moneyType = ?", whereArgs: [moneyType]);
+
+    return res.isNotEmpty ? res : [];
+  }
+  getAllCriptoInfo() async {
     final db = await database;
     var res = await db.query("Criptos");
 
@@ -81,15 +96,5 @@ class DatabaseHelper {
     var res = await db.update("Criptos", value,
         where: "moneyType = ?", whereArgs: [moneyType]);
     return res;
-  }
-
-  deleteCripto(double id) async {
-    final db = await database;
-    db.delete("Criptos", where: "id = ?", whereArgs: [id]);
-  }
-
-  deleteAll() async {
-    final db = await database;
-    db.rawDelete("Delete * from Criptos");
   }
 }
