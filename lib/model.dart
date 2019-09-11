@@ -1,6 +1,7 @@
 import 'currensy.dart';
 import 'netWorking.dart';
 import 'dbFunctions.dart';
+import 'package:connectivity/connectivity.dart';
 
 class Model {
   DatabaseHelper _db;
@@ -13,21 +14,37 @@ class Model {
     _db = DatabaseHelper.internal();
     _net = NetWorking();
   }
+  Future<bool> check() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile) {
+      return true;
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      return true;
+    }
+    return false;
+  }
   getDB() async {
-    final dataBase = await _db.database;
+
+
     int rowCount = await _db.getRawCount();
     if (rowCount == 0) {
-      await getCurrencyAndCountryName();
-      return dataBase;
+      if(await check()) {
+        await getCurrencyAndCountryName();
+
+        return true;
+      }
+      return false;
     }
-    await upDateDB();
-    return dataBase;
+    if(await check()) {
+      await upDateDB();
+    }
+    return true;
   }
 
   getCurrencyAndCountryName() async {
     String currencyCode = '';
     Map<String, dynamic> currensyAndCountry =
-        await _net.makeGetRequestForCurrencyName();
+    await _net.makeGetRequestForCurrencyName();
     for (var currencyCodes in currensyAndCountry.keys) {
       _allCurrencyCodes.add(currencyCodes);
     }
@@ -41,7 +58,7 @@ class Model {
 
   getCriptoCurrencyInfo(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
-        await _net.makeGetRequestCurrencyInfo(currencyCode);
+    await _net.makeGetRequestCurrencyInfo(currencyCode);
     await insertDB(criptoCurrencyInfo);
   }
 
@@ -86,7 +103,7 @@ class Model {
 
   getCriptoCurrencyInfoForUpdate(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
-        await _net.makeGetRequestCurrencyInfo(currencyCode);
+    await _net.makeGetRequestCurrencyInfo(currencyCode);
     upDateCripto(criptoCurrencyInfo);
   }
 
@@ -102,38 +119,37 @@ class Model {
           everyCurrency, createMapforUpdate(criptoCurrencyInfo[everyCurrency]));
     }
   }
-
-  upDateDB() async {
+  upDateDB() async{
     List currencyNames = [];
     String currencyName = '';
     int rowCount = await _db.getRawCount();
     currencyNames = await getCurrencynamesForURL(rowCount);
     currencyName = cutListFirst(currencyNames.length, currencyNames);
-    print(currencyName);
     await getCriptoCurrencyInfoForUpdate(currencyName);
     currencyName = cutListSecond(currencyNames.length, currencyNames);
-    print(currencyName);
 
     await getCriptoCurrencyInfoForUpdate(currencyName);
   }
-
   getCriptoColumnInfo(int id, String columnName) async {
-    return _db.getCriptoColumnInfo(id, columnName);
+    return await _db.getCriptoColumnInfo(id, columnName);
   }
 
   getCriptoInfoViaId(int id) async {
     return await _db.getCriptoInfoViaId(id);
   }
-
   getCriptoInfoViaMoneyType(String moneyType) async {
-    return _db.getCriptoInfoViaMoneyType(moneyType);
+    return await _db.getCriptoInfoViaMoneyType(moneyType);
   }
-
   getAllCriptoInfo() async {
-    return _db.getAllCriptoInfo();
+    List <Cripto> allInfoCripto = [];
+    List allInfo = await _db.getAllCriptoInfo();
+    for(int i  = 0; i < allInfo.length; ++i){
+      allInfoCripto.add(Cripto(id: allInfo[i]["id"],countryName: allInfo[i]["countryName"],moneyType: allInfo[i]["moneyType"],value: allInfo[i]["value"],flagPath: allInfo[i]["flagPath"]));
+    }
+    return  allInfoCripto;
   }
 
   getRawCount() async {
-    return _db.getRawCount();
+    return await _db.getRawCount();
   }
 }

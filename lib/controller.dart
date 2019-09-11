@@ -11,11 +11,15 @@ class Controller {
   }
 
   upDateDB(Map<String, dynamic> criptoCurrencyInfo) async {
-    return _model.upDateDB();
+    final db = await _model.upDateDB();
+    if (db == null){
+      return null;
+    }
+    return db;
   }
 
   getCriptoColumnInfo(int id, String columnName) async {
-    return _model.getCriptoColumnInfo(id, columnName);
+    return await _model.getCriptoColumnInfo(id, columnName);
   }
 
   getCriptoInfoViaId(int id) async {
@@ -23,14 +27,14 @@ class Controller {
   }
 
   getCriptoInfoViaMoneyType(String moneyType) async {
-    return _model.getCriptoInfoViaMoneyType(moneyType);
+    return await _model.getCriptoInfoViaMoneyType(moneyType);
   }
 
   getAllCriptoInfo() async {
-    return _model.getAllCriptoInfo();
+    return await _model.getAllCriptoInfo();
   }
 
   getRawCount() async {
-    return _model.getRawCount();
+    return await _model.getRawCount();
   }
 }

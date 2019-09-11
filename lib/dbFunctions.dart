@@ -25,13 +25,13 @@ class DatabaseHelper {
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     path = join(documentsDirectory.path, "TestDB5.db");
-    print(path.toString() + '       aaaaaaaaaaaa');
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
-      await db.execute(
-          'CREATE TABLE Criptos (id SERIAL PRIMARY KEY, countryName TEXT NOT NULL UNIQUE, moneyType  TEXT NOT NULL UNIQUE, value REAL NOT NULL,flagPath TEXT NOT NULL)');
-    });
+          await db.execute(
+              'CREATE TABLE Criptos (id SERIAL PRIMARY KEY, countryName TEXT NOT NULL UNIQUE, moneyType  TEXT NOT NULL UNIQUE, value REAL NOT NULL,flagPath TEXT NOT NULL)');
+        });
   }
+
 
   insertNewCripto(Cripto newCripto) async {
     final db = await database;
@@ -65,19 +65,16 @@ class DatabaseHelper {
 
   getCriptoInfoViaId(int id) async {
     final db = await database;
-    var res = await db.query("Criptos", where: "id = ?", whereArgs: [id]);
+    var res = await db.query("Criptos",where: "id = ?", whereArgs: [id]);
 
     return res.isNotEmpty ? Cripto.fromJson(res[0]) : [];
   }
-
   getCriptoInfoViaMoneyType(String moneyType) async {
     final db = await database;
-    var res = await db
-        .query("Criptos", where: "moneyType = ?", whereArgs: [moneyType]);
+    var res = await db.query("Criptos",where: "moneyType = ?", whereArgs: [moneyType]);
 
     return res.isNotEmpty ? Cripto.fromJson(res[0]) : [];
   }
-
   getAllCriptoInfo() async {
     final db = await database;
     var res = await db.query("Criptos");
