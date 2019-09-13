@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
 
+import 'selectedType.dart';
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = new DatabaseHelper.internal();
   DatabaseHelper.internal();
@@ -27,11 +29,21 @@ class DatabaseHelper {
     path = join(documentsDirectory.path, "TestDB5.db");
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
-          await db.execute(
-              'CREATE TABLE Criptos (id SERIAL PRIMARY KEY, countryName TEXT NOT NULL UNIQUE, moneyType  TEXT NOT NULL UNIQUE, value REAL NOT NULL,flagPath TEXT NOT NULL)');
-        });
+      await db.execute(
+          'CREATE TABLE Criptos (id SERIAL PRIMARY KEY, countryName TEXT NOT NULL UNIQUE, moneyType  TEXT NOT NULL UNIQUE, value REAL NOT NULL,flagPath TEXT NOT NULL)');
+      await db.execute(
+          'CREATE TABLE SelectedValue (firstSelected TEXT NOT NULL , secondSelected TEXT NOT NULL)');
+    });
   }
 
+  insertSelectedValue(SelectedType selectedType) async {
+    final db = await database;
+    var res = await db.insert(
+      'SelectedValue',
+      selectedType.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 
   insertNewCripto(Cripto newCripto) async {
     final db = await database;
@@ -40,8 +52,6 @@ class DatabaseHelper {
       newCripto.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-
-    return res;
   }
 
   getCriptoColumnInfo(int id, String columnName) async {
@@ -65,21 +75,30 @@ class DatabaseHelper {
 
   getCriptoInfoViaId(int id) async {
     final db = await database;
-    var res = await db.query("Criptos",where: "id = ?", whereArgs: [id]);
+    var res = await db.query("Criptos", where: "id = ?", whereArgs: [id]);
 
     return res.isNotEmpty ? Cripto.fromJson(res[0]) : [];
   }
+
   getCriptoInfoViaMoneyType(String moneyType) async {
     final db = await database;
-    var res = await db.query("Criptos",where: "moneyType = ?", whereArgs: [moneyType]);
+    var res = await db
+        .query("Criptos", where: "moneyType = ?", whereArgs: [moneyType]);
 
     return res.isNotEmpty ? Cripto.fromJson(res[0]) : [];
   }
+
   getAllCriptoInfo() async {
     final db = await database;
     var res = await db.query("Criptos");
 
     return res.isNotEmpty ? res : [];
+  }
+
+  getSelectedValueInfo() async {
+    final db = await database;
+    var res = await db.query("SelectedValue");
+    return res.isNotEmpty ? SelectedType.fromJson(res[0]) : [];
   }
 
   getRawCount() async {
@@ -90,10 +109,14 @@ class DatabaseHelper {
     return res;
   }
 
-  updateDB(String moneyType, Map<String, num> value) async {
+  updateCripto(String moneyType, Map<String, num> value) async {
     final db = await database;
-    var res = await db.update("Criptos", value,
+    await db.update("Criptos", value,
         where: "moneyType = ?", whereArgs: [moneyType]);
-    return res;
+  }
+
+  updateSelectedValue(SelectedType selectedType) async {
+    final db = await database;
+    await db.update("SelectedValue", selectedType.toJson());
   }
 }

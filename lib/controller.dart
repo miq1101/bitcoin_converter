@@ -1,4 +1,5 @@
 import 'model.dart';
+import 'selectedType.dart';
 
 class Controller {
   Model _model;
@@ -10,12 +11,8 @@ class Controller {
     return await _model.getDB();
   }
 
-  upDateDB(Map<String, dynamic> criptoCurrencyInfo) async {
-    final db = await _model.upDateDB();
-    if (db == null){
-      return null;
-    }
-    return db;
+  upDateDB() async {
+    return await _model.upDateDB();
   }
 
   getCriptoColumnInfo(int id, String columnName) async {
@@ -36,5 +33,13 @@ class Controller {
 
   getRawCount() async {
     return await _model.getRawCount();
+  }
+
+  getSelectedValueInfo() async {
+    return await _model.getSelectedValueInfo();
+  }
+
+  updateSelectedValue(SelectedType selectedType) async {
+    await _model.updateSelectedValue(selectedType);
   }
 }

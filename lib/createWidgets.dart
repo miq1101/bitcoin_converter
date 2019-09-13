@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'selectedType.dart';
+import 'listForSelect.dart';
 
 import 'controller.dart';
 import 'currensy.dart';
 
-mixin CreateWidgets {
+class CreateWidgets {
   Controller ctrl = Controller();
-  bool enabledPopup = true;
+  String _selectedValue;
+  final _topController = TextEditingController();
+  final _bottomController = TextEditingController();
+  CreateWidgets() {
+    _selectedValue = "0.0";
+  }
 
   Widget createListTile(
       {Widget leading = const Text(""),
-        Widget title = const Text(""),
-        Widget subtitle = const Text(""),
-        Widget trailing = const Text(""),
-        Function() onTap  }) {
+      Widget title = const Text(""),
+      Widget subtitle = const Text(""),
+      Widget trailing = const Text(""),
+      Function() onTap}) {
     return ListTile(
       leading: leading,
       title: title,
@@ -22,67 +29,136 @@ mixin CreateWidgets {
     );
   }
 
+  Widget topListTile(Widget leading, Widget title, Widget subtitle,
+      Widget trailing, BuildContext context) {
+    return createListTile(
+      leading: leading,
+      title: title,
+      subtitle: subtitle,
+      trailing: trailing,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (
+            context,
+          ) =>
+                  ListForSelect("top")),
+        );
+      },
+    );
+  }
 
-  Widget topListTile (Widget leading,Widget title,Widget subtitle,Widget trailing ) {
+  Widget bottomListTile(Widget leading, Widget title, Widget subtitle,
+      Widget trailing, BuildContext context) {
     return createListTile(
       leading: leading,
       title: title,
       subtitle: subtitle,
       trailing: trailing,
       onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (
+            context,
+          ) =>
+                  ListForSelect("bottom")),
+        );
       },
     );
   }
-  Widget bottomListTile (Widget leading,Widget title,Widget subtitle,Widget trailing) {
-    return createListTile(
-      leading: leading,
-      title: title,
-      subtitle: subtitle,
-      trailing: trailing,
-      onTap: () {
-      },
-    );
-  }
-  Future<List<Cripto>> _getCripto() async {
+
+  Future<List<Cripto>> getCripto() async {
     return await ctrl.getAllCriptoInfo();
   }
 
-  Widget forCriptoConvert(topLeading,topTitle,topSubtitle,topTrailing,bottomLeading,bottomTitle,bottomSubtitle,bottomTrailing){
+  Future<List<Cripto>> SelectedValues() async {
+    List<Cripto> selectedValues = [];
+    SelectedType selectedType = await ctrl.getSelectedValueInfo();
+    selectedValues
+        .add(await ctrl.getCriptoInfoViaMoneyType(selectedType.firstSelected));
+    selectedValues
+        .add(await ctrl.getCriptoInfoViaMoneyType(selectedType.secondSelected));
+    return selectedValues;
+  }
+
+  Widget forCriptoConvert(context) {
     return Container(
-      padding: EdgeInsets.only(left: 20.0,right: 20.0),
-      color: Colors.lightBlue,
-      child: Column(
-        children: <Widget>[
-          SizedBox(height: 70.0),
-          topListTile(topLeading,topTitle,topSubtitle,topTrailing),
-          TextFormField(
-            style: TextStyle(color: Colors.white, fontSize: 30.0),
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-                hintText: "0.0",
-                hintStyle: TextStyle(color: Colors.white, fontSize: 30.0)),
-          ),
-
-          SizedBox(height: 30.0),
-          bottomListTile(bottomLeading,bottomTitle,bottomSubtitle,bottomTrailing),
-          TextFormField(
-            readOnly: true,
-            style: TextStyle(color: Colors.white, fontSize: 30.0),
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-                hintText: "0.0",
-                hintStyle: TextStyle(color: Colors.white, fontSize: 30.0)),
-          ),
-
-        ],
+      child: FutureBuilder(
+        future: SelectedValues(),
+        builder: (BuildContext context, AsyncSnapshot<List<Cripto>> snapshot) {
+          if (snapshot.data == null) {
+            return Container(
+              child: Center(
+                child: Text("Loading..."),
+              ),
+            );
+          } else {
+            return Container(
+              padding: EdgeInsets.only(left: 20.0, right: 20.0),
+              color: Colors.lightBlue,
+              child: Column(
+                children: <Widget>[
+                  SizedBox(height: 70.0),
+                  topListTile(
+                      Image.asset(snapshot.data[0].flagPath),
+                      Text(snapshot.data[0].moneyType),
+                      Text(snapshot.data[0].countryName),
+                      Container(
+                        height: 0,
+                        width: 0,
+                      ),
+                      context),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: _selectedValue,
+                    ),
+                    keyboardType: TextInputType.number,
+                    controller: _topController,
+                    onChanged: (value) {
+                      double val;
+                      if (value == "") {
+                        val = 0.0;
+                      } else {
+                        val = double.parse(value);
+                      }
+                      _bottomController.text = (val *
+                              snapshot.data[1].value.toDouble() /
+                              snapshot.data[0].value.toDouble())
+                          .toString();
+                    },
+                  ),
+                  SizedBox(height: 30.0),
+                  bottomListTile(
+                      Image.asset(snapshot.data[1].flagPath),
+                      Text(snapshot.data[1].moneyType),
+                      Text(snapshot.data[1].countryName),
+                      Container(
+                        height: 0,
+                        width: 0,
+                      ),
+                      context),
+                  TextField(
+                    controller: _bottomController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      hintText: _selectedValue,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        },
       ),
     );
   }
 
-  Widget forAllList(){
+  Widget forAllList() {
     return Container(
       child: FutureBuilder(
-        future: _getCripto(),
+        future: getCripto(),
         builder: (BuildContext context, AsyncSnapshot<List<Cripto>> snapshot) {
           if (snapshot.data == null) {
             return Container(

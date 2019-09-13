@@ -7,60 +7,66 @@ class ConvertScreen extends StatefulWidget {
   _ConvertScreenState createState() => _ConvertScreenState();
 }
 
-class _ConvertScreenState extends State<ConvertScreen> with CreateWidgets {
-  Widget topLeading;
-  Widget topTitle ;
-  Widget topSubtitle ;
-  Widget topTrailing ;
-  Widget bottomLeading ;
-  Widget bottomTitle ;
-  Widget bottomSubtitle ;
-  Widget bottomTrailing;
-  int _selectedIndex = 0;
+class _ConvertScreenState extends State<ConvertScreen> {
+  CreateWidgets create;
+  Controller ctrl;
+  int _selectedIndex;
+  Icon homeIcon, listIcon;
+  String home, list;
   @override
   void initState() {
-    topLeading = Image.asset("assets/BTC.png");
-    topTitle =  Text(
-      "BTC",
-      style: TextStyle(color: Colors.white, fontSize: 30.0),
-    );
-    topSubtitle = Text("Bitcoin",
-        style: TextStyle(
-          color: Colors.white,
-        ));
-    topTrailing = Icon(
-      Icons.arrow_drop_down_circle,
+    create = CreateWidgets();
+    ctrl = Controller();
+    _selectedIndex = 0;
+    homeIcon = Icon(
+      Icons.home,
       color: Colors.white,
-      size: 20.0,
     );
-    bottomLeading = Image.asset("assets/AMD.png");
-    bottomTitle = Text(
-      "AMD",
-      style: TextStyle(color: Colors.white, fontSize: 30.0),
-    );
-    bottomSubtitle = Text("Armenian dram",
-        style: TextStyle(
-          color: Colors.white,
-        ));
-    bottomTrailing = Icon(
-      Icons.arrow_drop_down_circle,
+    listIcon = Icon(
+      Icons.list,
       color: Colors.white,
-      size: 20.0,
     );
+    home = "Home";
+    list = "All list";
+
     super.initState();
   }
+
   void changeIndex(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  BottomNavigationBarItem bottomNavigationBarItem(Icon icon, String text) {
+    return BottomNavigationBarItem(
+        icon: icon,
+        title: Text(
+          text,
+          style: TextStyle(color: Colors.white),
+        ));
+  }
+
+  Widget noConnectDialog() {
+    return AlertDialog(
+      title: Text("No connection"),
+      actions: <Widget>[
+        FlatButton(
+          child: Text("OK"),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        )
+      ],
+    );
+  }
+
   Widget body(int index) {
     if (index == 0) {
-      return forCriptoConvert(topLeading,topTitle,topSubtitle,topTrailing,bottomLeading,bottomTitle,bottomSubtitle,bottomTrailing);
+      return create.forCriptoConvert(context);
     }
 
-    return forAllList();
+    return create.forAllList();
   }
 
   @override
@@ -74,7 +80,15 @@ class _ConvertScreenState extends State<ConvertScreen> with CreateWidgets {
                 IconButton(
                   icon: Icon(Icons.refresh),
                   color: Colors.white,
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (!(await ctrl.upDateDB())) {
+                      showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return noConnectDialog();
+                          });
+                    }
+                  },
                 ),
               ],
             ),
@@ -82,22 +96,8 @@ class _ConvertScreenState extends State<ConvertScreen> with CreateWidgets {
             bottomNavigationBar: BottomNavigationBar(
               backgroundColor: Colors.blue,
               items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                    icon: Icon(
-                      Icons.home,
-                      color: Colors.white,
-                    ),
-                    title: Text(
-                      "Home",
-                      style: TextStyle(color: Colors.white),
-                    )),
-                BottomNavigationBarItem(
-                    icon: Icon(
-                      Icons.list,
-                      color: Colors.white,
-                    ),
-                    title: Text("All list",
-                        style: TextStyle(color: Colors.white))),
+                bottomNavigationBarItem(homeIcon, home),
+                bottomNavigationBarItem(listIcon, list),
               ],
               currentIndex: _selectedIndex,
               onTap: changeIndex,

@@ -10,13 +10,12 @@ import 'noConnection.dart';
 void main() async {
   Controller cntler = Controller();
   bool dbIsEmpty = await cntler.getDB();
-  if(dbIsEmpty) {
+  if (dbIsEmpty) {
     runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
       home: ConvertScreen(),
     ));
-  }
-  else{
+  } else {
     runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
       home: NoConnection(),

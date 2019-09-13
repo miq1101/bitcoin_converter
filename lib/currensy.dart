@@ -16,18 +16,18 @@ class Cripto {
       {this.id, this.countryName, this.moneyType, this.value, this.flagPath});
 
   factory Cripto.fromJson(Map<String, dynamic> json) => Cripto(
-    id: json["id"],
-    countryName: json["countryName"],
-    moneyType: json["moneyType"],
-    value: json["value"],
-    flagPath: json["flagPath"],
-  );
+        id: json["id"],
+        countryName: json["countryName"],
+        moneyType: json["moneyType"],
+        value: json["value"],
+        flagPath: json["flagPath"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "moneyType": moneyType,
-    "value": value,
-    "countryName": countryName,
-    "flagPath": flagPath,
-  };
+        "id": id,
+        "moneyType": moneyType,
+        "value": value,
+        "countryName": countryName,
+        "flagPath": flagPath,
+      };
 }
