@@ -1,4 +1,0 @@
-#Fri Sep 13 15:38:01 AMT 2019
-base.0=/home/flutter/bitcoin_converter/build/app/intermediates/transforms/dexMerger/debug/0
-path.0=classes.dex
-renamed.0=classes.dex
