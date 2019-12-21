@@ -1,8 +1,10 @@
 import 'package:bitcoin_converter/src/bloc/change_currency_bloc.dart';
 import 'package:bitcoin_converter/src/bloc/exchange_bloc.dart';
+import 'package:bitcoin_converter/src/bloc/update_bloc.dart';
 import 'package:bitcoin_converter/src/models/currency.dart';
 import 'package:bitcoin_converter/src/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:search_widget/search_widget.dart';
 
 class BtcHomePage extends StatefulWidget {
   @override
@@ -13,7 +15,9 @@ class _BtcHomePageState extends State<BtcHomePage> {
   final _myController = TextEditingController();
   PageController _pageController;
   BtcChangeCurrencyBloc _changeCurrencyBloc;
+  BtcAllListBloc _allListBloc;
   BtcExchangeBloc _btcExchangeBloc;
+  Widget _allListForSelect;
   int _bottomSelectedIndex;
   Icon _homeIcon;
   Icon _listIcon;
@@ -64,6 +68,173 @@ class _BtcHomePageState extends State<BtcHomePage> {
     });
   }
 
+  Widget _dividerField(){
+    return Container(
+      height: BtcConstants.screenHeight / 18.32,
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border:
+          Border.all(color: Colors.white),
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20.0),
+              topRight:
+              Radius.circular(20.0))),
+      child: Center(
+        child: Divider(
+          color: Colors.black,
+          height: BtcConstants.screenHeight / 284,
+          indent: BtcConstants.screenWidth / 2.37,
+          endIndent: BtcConstants.screenWidth / 2.37,
+        ),
+      ),
+    );
+  }
+
+  Widget _popupListItemWidget(BtcCripto cripto){
+    return Container(
+      padding: const EdgeInsets.all(12),
+      child: Text(
+        cripto.countryName,
+        style: const TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
+  Widget _selectedItemWidget (BtcCripto cripto,String position){
+      return ListTile(
+        leading: Image.asset(cripto.flagPath),
+        title: Text(cripto.moneyType),
+        subtitle: Text(cripto.countryName),
+        onTap: () async {
+          if (position == "top") {
+            _changeCurrencyBloc.updateSelectedValue(
+                {"firstSelected": cripto.moneyType});
+            BtcConstants.firstValue = cripto.value;
+          } else {
+            _changeCurrencyBloc.updateSelectedValue(
+                {"secondSelected": cripto.moneyType});
+            BtcConstants.secondValue = cripto.value;
+          }
+          _changeCurrencyBloc.addSink(position);
+          _btcExchangeBloc.sink.add(null);
+          Navigator.pop(context);
+        });
+  }
+
+  Widget _noItemFound(){
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(
+          Icons.folder_open,
+          size: 24,
+          color: Colors.grey[900].withOpacity(0.7),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          "No Items Found",
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[900].withOpacity(0.7),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _searchTextField (TextEditingController controller,FocusNode focusNode){
+    return Container(
+      padding:  EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      color: Colors.white,
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+        decoration: InputDecoration(
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Color(0x4437474F),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+          ),
+          suffixIcon: Icon(Icons.search),
+          border: InputBorder.none,
+          hintText: "Search country...",
+          contentPadding: const EdgeInsets.only(
+            left: 16,
+            right: 20,
+            top: 14,
+            bottom: 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _searchField(AsyncSnapshot snapshot,String position){
+    return SearchWidget<BtcCripto>(
+      dataList: snapshot.data,
+      hideSearchBoxWhenItemSelected: false,
+      listContainerHeight: MediaQuery.of(context).size.height / 4,
+      queryBuilder: (query, list) {
+        return list
+            .where((item) => item.countryName
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+            .toList();
+      },
+      popupListItemBuilder: (item) {
+        return _popupListItemWidget(item);
+      },
+      selectedItemBuilder: (selectedItem, deleteSelectedItem) {
+        return _selectedItemWidget(selectedItem,position);
+      },
+      // widget customization
+      noItemsFoundWidget: _noItemFound(),
+      textFieldBuilder: (controller, focusNode) {
+        return _searchTextField(controller, focusNode);
+      },
+//      onItemSelected: (item) {
+//        setState(() {
+//          _selectedItem = item;
+//        });
+//      },
+    );
+  }
+
+  Widget _listForSelect(AsyncSnapshot snapshot,String position){
+    return Container(
+      height: BtcConstants.screenHeight -
+          BtcConstants.screenHeight / 3.8,
+      color: Colors.white,
+      child: ListView.builder(
+        itemCount: snapshot.data.length,
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+              leading: Image.asset(snapshot.data[index].flagPath),
+              title: Text(snapshot.data[index].moneyType),
+              subtitle: Text(snapshot.data[index].countryName),
+              onTap: () async {
+                if (position == "top") {
+                  _changeCurrencyBloc.updateSelectedValue(
+                      {"firstSelected": snapshot.data[index].moneyType});
+                  BtcConstants.firstValue = snapshot.data[index].value;
+                } else {
+                  _changeCurrencyBloc.updateSelectedValue(
+                      {"secondSelected": snapshot.data[index].moneyType});
+                  BtcConstants.secondValue = snapshot.data[index].value;
+                }
+                _changeCurrencyBloc.addSink(position);
+                _btcExchangeBloc.sink.add(null);
+                Navigator.pop(context);
+              });
+        },
+      ),
+    );
+  }
+
   Widget _bottomSheet(String position) {
     return Container(
       child: FutureBuilder(
@@ -76,28 +247,14 @@ class _BtcHomePageState extends State<BtcHomePage> {
               ),
             );
           } else {
-            return ListView.builder(
-              itemCount: snapshot.data.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                    leading: Image.asset(snapshot.data[index].flagPath),
-                    title: Text(snapshot.data[index].moneyType),
-                    subtitle: Text(snapshot.data[index].countryName),
-                    onTap: () async {
-                      if (position == "top") {
-                        _changeCurrencyBloc.updateSelectedValue(
-                            {"firstSelected": snapshot.data[index].moneyType});
-                        BtcConstants.firstValue = snapshot.data[index].value;
-                      } else {
-                        _changeCurrencyBloc.updateSelectedValue(
-                            {"secondSelected": snapshot.data[index].moneyType});
-                        BtcConstants.secondValue = snapshot.data[index].value;
-                      }
-                      _changeCurrencyBloc.addSink(position);
-                      _btcExchangeBloc.sink.add(null);
-                      Navigator.pop(context);
-                    });
-              },
+            return Column(
+
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                _dividerField(),
+                _searchField(snapshot,position),
+                _listForSelect(snapshot,position),
+              ],
             );
           }
         },
@@ -112,7 +269,9 @@ class _BtcHomePageState extends State<BtcHomePage> {
       title: title,
       subtitle: subtitle,
       onTap: () async {
-        showModalBottomSheet(
+        showModalBottomSheet<Null>(
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
             context: context,
             builder: (BuildContext context) => _bottomSheet(position));
       },
@@ -141,6 +300,29 @@ class _BtcHomePageState extends State<BtcHomePage> {
     );
   }
 
+  Widget _topTextField(){
+    return Container(
+      padding: EdgeInsets.only(
+          left: BtcConstants.screenWidth / 16,
+          right: BtcConstants.screenWidth / 16),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: _selectedValue,
+        ),
+        controller: _myController,
+        keyboardType: TextInputType.number,
+        onChanged: (value) {
+          if (value != "") {
+            _btcExchangeBloc.value = value;
+          } else {
+            _btcExchangeBloc.setValue = "0.0";
+          }
+          _btcExchangeBloc.sink.add(null);
+        },
+      ),
+    );
+  }
+
   Widget _bottomCurrency() {
     return StreamBuilder(
       stream: _changeCurrencyBloc.changeSecond,
@@ -163,6 +345,24 @@ class _BtcHomePageState extends State<BtcHomePage> {
     );
   }
 
+  Widget _bottomTextField(){
+    return StreamBuilder(
+        stream: _btcExchangeBloc.change,
+        builder: (context, AsyncSnapshot snapshot) {
+          return Container(
+            padding: EdgeInsets.only(
+                left: BtcConstants.screenWidth / 16,
+                right: BtcConstants.screenWidth / 16),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: snapshot.data,
+              ),
+              enabled: false,
+            ),
+          );
+        });
+  }
+
   Widget _btcExchangeScreen() {
     return Container(
       //padding: EdgeInsets.all(20.0),
@@ -171,62 +371,25 @@ class _BtcHomePageState extends State<BtcHomePage> {
           children: <Widget>[
             SizedBox(height: BtcConstants.screenHeight / 20),
             _topCurrency(),
-            Container(
-              padding: EdgeInsets.only(
-                  left: BtcConstants.screenWidth / 16,
-                  right: BtcConstants.screenWidth / 16),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: _selectedValue,
-                ),
-                controller: _myController,
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  if (value != "") {
-                    _btcExchangeBloc.value = value;
-                  } else {
-                    _btcExchangeBloc.setValue = "0.0";
-                  }
-                  _myController.text = value;
-                  _btcExchangeBloc.sink.add(null);
-                },
-              ),
-            ),
+            _topTextField(),
             SizedBox(height: BtcConstants.screenHeight / 10),
             _bottomCurrency(),
-            StreamBuilder(
-                stream: _btcExchangeBloc.change,
-                builder: (context, AsyncSnapshot snapshot) {
-                  return Container(
-                    padding: EdgeInsets.only(
-                        left: BtcConstants.screenWidth / 16,
-                        right: BtcConstants.screenWidth / 16),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: snapshot.data,
-                      ),
-                      enabled: false,
-                    ),
-                  );
-                })
+            _bottomTextField()
           ],
         ),
       ),
     );
   }
 
-  Future<List<BtcCripto>> getCripto() async {}
-
   Widget _btcAllCriptoList() {
     return Container(
-      child: FutureBuilder(
-        future: getCripto(),
-        builder:
-            (BuildContext context, AsyncSnapshot<List<BtcCripto>> snapshot) {
+      child: StreamBuilder(
+        stream: _allListBloc.list,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.data == null) {
             return Container(
               child: Center(
-                child: Text("Loading..."),
+                child: CircularProgressIndicator(),
               ),
             );
           } else {
@@ -252,6 +415,7 @@ class _BtcHomePageState extends State<BtcHomePage> {
       controller: _pageController,
       onPageChanged: (index) {
         _pageChanged(index);
+        FocusScope.of(context).requestFocus(FocusNode());
       },
       children: <Widget>[
         _btcExchangeScreen(),
@@ -285,7 +449,8 @@ class _BtcHomePageState extends State<BtcHomePage> {
     _changeCurrencyBloc = BtcChangeCurrencyBloc();
     _changeCurrencyBloc.getRequests();
     _btcExchangeBloc = BtcExchangeBloc();
-    _btcExchangeBloc.getRequest();
+    _allListBloc = BtcAllListBloc();
+    _allListBloc.sink.add(null);
     _pageController = PageController(
       initialPage: 0,
       keepPage: true,

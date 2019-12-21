@@ -28,16 +28,6 @@ class BtcExchangeBloc extends BtcBaseBloc {
     addValue.add(finalValue.toString());
   }
 
-  getRequest() async {}
-
-  getAllCriptoInfo() async {
-    return await repository.getAllCriptoInfo();
-  }
-
-  updateSelectedValue(Map<String, String> selectedValue) async {
-    await repository.updateSelectedValue(selectedValue);
-  }
-
   @override
   dispose() {
     _exchangeController.close();
