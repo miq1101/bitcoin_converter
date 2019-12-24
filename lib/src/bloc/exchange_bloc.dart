@@ -31,7 +31,6 @@ class BtcExchangeBloc extends BtcBaseBloc {
   @override
   dispose() {
     _exchangeController.close();
-
     _exchangeStream.close();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:bitcoin_converter/src/bloc/change_currency_bloc.dart';
 import 'package:bitcoin_converter/src/database/db_provider.dart';
 
 class BtcConstants {
@@ -9,7 +10,8 @@ class BtcConstants {
   static String apiKey;
   static String countryNameURL;
   static String criptoInfoURL;
-
+  static bool connectionStatus;
+  static BtcChangeCurrencyBloc changeCurrencyBloc;
   BtcConstants() {
     db = DatabaseHelper.internal();
     screenHeight = 0.0;
@@ -21,5 +23,7 @@ class BtcConstants {
     countryNameURL = 'https://openexchangerates.org/api/currencies.json';
     criptoInfoURL =
     'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=';
+    connectionStatus = true;
+    changeCurrencyBloc = BtcChangeCurrencyBloc();
   }
 }

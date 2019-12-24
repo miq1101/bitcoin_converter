@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bitcoin_converter/src/bloc/base_bloc.dart';
 import 'package:bitcoin_converter/src/models/currency.dart';
+import 'package:bitcoin_converter/src/utils/constants.dart';
 import 'package:rxdart/rxdart.dart';
 
 class BtcChangeCurrencyBloc extends BtcBaseBloc {
@@ -9,7 +10,7 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
     _exchangeFirstController.stream.listen(changeFirstSelected);
     _exchangeSecondController.stream.listen(changeSecondSelected);
   }
-
+  int rowCount;
   StreamController _exchangeFirstController = StreamController();
   StreamController _exchangeSecondController = StreamController();
 
@@ -26,23 +27,37 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
   StreamSink get secondSink => _exchangeSecondController.sink;
 
   void changeFirstSelected(data) async {
-    String firstSelected =
-        (await repository.getSelectedValueInfo()).firstSelected;
-    BtcCripto cripto =
-    await repository.getCriptoInfoViaMoneyType(firstSelected);
+    String firstSelected;
+    BtcCripto cripto;
+    if(rowCount == 0){
+      addFirstValue.add(null);
+    }
+    else {
+      firstSelected =
+          (await repository.getSelectedValueInfo()).firstSelected;
+      cripto =
+      await repository.getCriptoInfoViaMoneyType(firstSelected);
+    }
     addFirstValue.add(cripto);
   }
 
   void changeSecondSelected(data) async {
-    String secondSelected =
+    String secondSelected;
+    BtcCripto cripto;
+    if(rowCount == 0){
+      addFirstValue.add(null);
+    }
+    else{
+    secondSelected =
         (await repository.getSelectedValueInfo()).secondSelected;
-    BtcCripto cripto =
+     cripto =
     await repository.getCriptoInfoViaMoneyType(secondSelected);
+    }
     addSecondValue.add(cripto);
   }
 
   void getRequests() async {
-    await repository.getDB();
+    rowCount = await repository.getRawCount();
     firstSink.add(null);
     secondSink.add(null);
   }

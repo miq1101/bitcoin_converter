@@ -3,7 +3,6 @@ import 'package:bitcoin_converter/src/models/currency.dart';
 import 'package:bitcoin_converter/src/models/selected_type.dart';
 import 'package:bitcoin_converter/src/provider/provider.dart';
 import 'package:bitcoin_converter/src/utils/constants.dart';
-import 'package:connectivity/connectivity.dart';
 
 class BtcRepository {
   DatabaseHelper _db;
@@ -16,15 +15,7 @@ class BtcRepository {
     _db = BtcConstants.db;
     _net = BtcProvider();
   }
-  Future<bool> check() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.mobile) {
-      return true;
-    } else if (connectivityResult == ConnectivityResult.wifi) {
-      return true;
-    }
-    return false;
-  }
+
 
   getDB() async {
     BtcSelectedType _selectedType = BtcSelectedType();
@@ -129,7 +120,6 @@ class BtcRepository {
   }
 
   upDateDB() async {
-    if ((await check())) {
       List currencyNames = [];
       String currencyName = '';
       int rowCount = await _db.getRawCount();
@@ -138,9 +128,6 @@ class BtcRepository {
       await getCriptoCurrencyInfoForUpdate(currencyName);
       currencyName = cutListSecond(currencyNames.length, currencyNames);
       await getCriptoCurrencyInfoForUpdate(currencyName);
-      return true;
-    }
-    return false;
   }
 
   getCriptoColumnInfo(int id, String columnName) async {

@@ -77,7 +77,7 @@ class DatabaseHelper {
     final db = await database;
     var res = await db.query("Criptos", where: "id = ?", whereArgs: [id]);
 
-    return res.isNotEmpty ? BtcCripto.fromJson(res[0]) : [];
+    return res.isNotEmpty ? BtcCripto.fromJson(res[0]) : null;
   }
 
   getCriptoInfoViaMoneyType(String moneyType) async {
@@ -85,7 +85,7 @@ class DatabaseHelper {
     var res = await db
         .query("Criptos", where: "moneyType = ?", whereArgs: [moneyType]);
 
-    return res.isNotEmpty ? BtcCripto.fromJson(res[0]) : [];
+    return res.isNotEmpty ? BtcCripto.fromJson(res[0]) : null;
   }
 
   getAllCriptoInfo() async {
@@ -98,7 +98,7 @@ class DatabaseHelper {
   getSelectedValueInfo() async {
     final db = await database;
     var res = await db.query("SelectedValue");
-    return res.isNotEmpty ? BtcSelectedType.fromJson(res[0]) : [];
+    return res.isNotEmpty ? BtcSelectedType.fromJson(res[0]) : null;
   }
 
   getRawCount() async {

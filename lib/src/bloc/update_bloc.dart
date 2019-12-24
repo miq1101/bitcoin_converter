@@ -37,7 +37,6 @@ class BtcAllListBloc extends BtcBaseBloc {
   @override
   dispose() {
     _allListController.close();
-
     _allListStream.close();
   }
 }
