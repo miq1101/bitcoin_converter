@@ -1,5 +1,6 @@
 import 'package:bitcoin_converter/src/bloc/change_currency_bloc.dart';
 import 'package:bitcoin_converter/src/database/db_provider.dart';
+import 'package:bitcoin_converter/src/models/currency.dart';
 
 class BtcConstants {
   static double screenHeight;
@@ -11,6 +12,7 @@ class BtcConstants {
   static String countryNameURL;
   static String criptoInfoURL;
   static bool connectionStatus;
+  static List<BtcCripto> allCriptoList;
   static BtcChangeCurrencyBloc changeCurrencyBloc;
   BtcConstants() {
     db = DatabaseHelper.internal();
@@ -24,6 +26,7 @@ class BtcConstants {
     criptoInfoURL =
     'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=';
     connectionStatus = true;
+    allCriptoList = [];
     changeCurrencyBloc = BtcChangeCurrencyBloc();
   }
 }

@@ -27,7 +27,6 @@ dependencies:
   currency_icons: ^0.0.2
   connectivity: ^0.4.4
   rxdart: ^0.22.1
-  search_widget: ^1.0.0
 
 
 

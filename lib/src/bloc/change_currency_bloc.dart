@@ -9,34 +9,58 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
   BtcChangeCurrencyBloc() {
     _exchangeFirstController.stream.listen(changeFirstSelected);
     _exchangeSecondController.stream.listen(changeSecondSelected);
+    _exchangeController.stream.listen(exchangeValue);
+    _allListController.stream.listen(updateValue);
+    _listForSelectController.stream.listen(selectValue);
+    value = "0.0";
+    searchText = "";
   }
-  int rowCount;
+
   StreamController _exchangeFirstController = StreamController();
   StreamController _exchangeSecondController = StreamController();
+  StreamController _exchangeController = StreamController();
+  StreamController _allListController = StreamController();
+  StreamController _listForSelectController = StreamController();
+
+  int _rowCount;
+  String value;
+  String searchText;
+  set setValue(String topValue) => value = topValue;
+  set setSearchText(String searchInput) => searchText = searchInput;
+
+  Stream get change => _exchangeStream.stream;
+  Stream get changeFirst => _firstStream.stream;
+  Stream get changeSecond => _secondStream.stream;
+  Stream get list => _allListStream.stream;
+  Stream get listSelect => _listForSelectStream.stream;
 
   final _firstStream = BehaviorSubject();
   final _secondStream = BehaviorSubject();
+  final _exchangeStream = BehaviorSubject<String>.seeded("0.0");
+  final _allListStream = BehaviorSubject();
+  final _listForSelectStream = BehaviorSubject();
 
-  Stream get changeFirst => _firstStream.stream;
   Sink get addFirstValue => _firstStream.sink;
-
-  Stream get changeSecond => _secondStream.stream;
   Sink get addSecondValue => _secondStream.sink;
+  Sink get addExchangeValue => _exchangeStream.sink;
+  Sink get addUpdateValue => _allListStream.sink;
+  Sink get addSelectValue => _listForSelectStream.sink;
 
   StreamSink get firstSink => _exchangeFirstController.sink;
   StreamSink get secondSink => _exchangeSecondController.sink;
+  StreamSink get exchangeSink => _exchangeController.sink;
+  StreamSink get allListSink => _allListController.sink;
+  StreamSink get allListForSelectSink => _listForSelectController.sink;
 
   void changeFirstSelected(data) async {
     String firstSelected;
     BtcCripto cripto;
-    if(rowCount == 0){
+    if (_rowCount == 0) {
       addFirstValue.add(null);
-    }
-    else {
-      firstSelected =
-          (await repository.getSelectedValueInfo()).firstSelected;
-      cripto =
-      await repository.getCriptoInfoViaMoneyType(firstSelected);
+    } else {
+      firstSelected = (await repository.getSelectedValueInfo()).firstSelected;
+      cripto = await repository.getCriptoInfoViaMoneyType(firstSelected);
+      BtcConstants.firstValue = cripto.value;
     }
     addFirstValue.add(cripto);
   }
@@ -44,26 +68,60 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
   void changeSecondSelected(data) async {
     String secondSelected;
     BtcCripto cripto;
-    if(rowCount == 0){
+    if (_rowCount == 0) {
       addFirstValue.add(null);
-    }
-    else{
-    secondSelected =
-        (await repository.getSelectedValueInfo()).secondSelected;
-     cripto =
-    await repository.getCriptoInfoViaMoneyType(secondSelected);
+    } else {
+      secondSelected = (await repository.getSelectedValueInfo()).secondSelected;
+      cripto = await repository.getCriptoInfoViaMoneyType(secondSelected);
+      BtcConstants.secondValue = cripto.value;
     }
     addSecondValue.add(cripto);
   }
 
+  void exchangeValue(data) async {
+    double topValue = BtcConstants.firstValue;
+    double bottomValue = BtcConstants.secondValue;
+    double finalValue = double.parse(value) * bottomValue / topValue;
+    addExchangeValue.add(finalValue.toString());
+  }
+
+  void updateValue(data) async {
+    addUpdateValue.add(await getAllCriptoInfo());
+  }
+
+  void selectValue(data) async {
+    if (searchText == "") {
+      addSelectValue.add(BtcConstants.allCriptoList);
+    } else {
+      searchText[0].toLowerCase();
+      List<BtcCripto> searchList = [];
+      for (var criptoElement in BtcConstants.allCriptoList) {
+        if (criptoElement.countryName[0] == searchText[0] &&
+            criptoElement.countryName.contains(searchText)) {
+          searchList.add(criptoElement);
+        }
+      }
+      addSelectValue.add(searchList);
+    }
+  }
+
   void getRequests() async {
-    rowCount = await repository.getRawCount();
+    _rowCount = await repository.getRawCount();
     firstSink.add(null);
     secondSink.add(null);
+    allListSink.add(null);
+  }
+
+  void updateDb() async {
+    repository.upDateDB();
+
+    exchangeSink.add(null);
+    allListSink.add(null);
   }
 
   getAllCriptoInfo() async {
-    return await repository.getAllCriptoInfo();
+    BtcConstants.allCriptoList = await repository.getAllCriptoInfo();
+    return BtcConstants.allCriptoList;
   }
 
   updateSelectedValue(Map<String, String> selectedValue) async {
@@ -88,5 +146,11 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
     _exchangeSecondController.close();
     _firstStream.close();
     _secondStream.close();
+    _exchangeController.close();
+    _exchangeStream.close();
+    _allListController.close();
+    _allListStream.close();
+    _listForSelectController.close();
+    _listForSelectStream.close();
   }
 }

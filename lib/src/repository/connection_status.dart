@@ -61,6 +61,7 @@ class _ConnectionStatusBarState extends State<ConnectionStatusBar>
     _rowCount = await _repository.getRawCount();
     _listener = _dataConnectionChecker.onStatusChange.listen((status) async {
       if (status == DataConnectionStatus.connected) {
+        BtcConstants.connectionStatus = true;
         if (_rowCount == 0) {
           await _repository.getDB();
           _rowCount = await _repository.getRawCount();
@@ -73,6 +74,7 @@ class _ConnectionStatusBarState extends State<ConnectionStatusBar>
           controller.reverse();
         }
       } else {
+        BtcConstants.connectionStatus = false;
         print(_rowCount);
         if (_rowCount == 0) {
           Navigator.push(
@@ -84,6 +86,7 @@ class _ConnectionStatusBarState extends State<ConnectionStatusBar>
           controller.forward();
         }
       }
+
     });
   }
 
