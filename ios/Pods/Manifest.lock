@@ -35,7 +35,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite/ios"
 
 SPEC CHECKSUMS:
-  connectivity: c72716e202a1225ec4810740d5cb56b8ae3bf4cc
+  connectivity: 6e94255659cc86dcbef1d452ad3e0491bb1b3e75
   Flutter: 446b87ace8a3747a167979213b4aef59a0b5e5fa
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
