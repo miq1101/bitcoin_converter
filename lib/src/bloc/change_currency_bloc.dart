@@ -81,8 +81,13 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
   void exchangeValue(data) async {
     double topValue = BtcConstants.firstValue;
     double bottomValue = BtcConstants.secondValue;
-    double finalValue = double.parse(value) * bottomValue / topValue;
-    addExchangeValue.add(finalValue.toString());
+    double parseValue = double.tryParse(value) ?? -1;
+    if(parseValue == -1){
+      addExchangeValue.add(parseValue.toString());
+    }else {
+      double finalValue = parseValue * bottomValue / topValue;
+      addExchangeValue.add(finalValue.toString());
+    }
   }
 
   void updateValue(data) async {
