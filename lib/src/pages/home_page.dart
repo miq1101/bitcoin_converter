@@ -449,33 +449,14 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
     super.initState();
   }
 
-  _updateTimer() {
-    const oneSec = const Duration(seconds: 1);
-    _timer = Timer.periodic(
-      oneSec,
-      (Timer timer) => () {
-        if (_startTimer < 1) {
-          if (BtcConstants.connectionStatus) {
-            BtcConstants.changeCurrencyBloc.updateDb();
-          }
-          print("kanchvec");
-          _updateTimer();
-        } else {
-          _startTimer = _startTimer - 1;
-        }
-      },
-    );
-  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _updateTimer();
-      print(_startTimer);
+      if (BtcConstants.connectionStatus) {
+        BtcConstants.changeCurrencyBloc.updateDb();
       print("########################");
-    } else {
-      print(_startTimer);
-      print("*******************");
+      }
     }
     super.didChangeAppLifecycleState(state);
   }
