@@ -81,13 +81,8 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
   void exchangeValue(data) async {
     double topValue = BtcConstants.firstValue;
     double bottomValue = BtcConstants.secondValue;
-    double parseValue = double.tryParse(value) ?? -1;
-    if(parseValue == -1){
-      addExchangeValue.add(parseValue.toString());
-    }else {
-      double finalValue = parseValue * bottomValue / topValue;
-      addExchangeValue.add(finalValue.toString());
-    }
+    double finalValue = double.parse(value) * bottomValue / topValue;
+    addExchangeValue.add(finalValue.toString());
   }
 
   void updateValue(data) async {
@@ -98,6 +93,7 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
     if (searchText == "") {
       addSelectValue.add(BtcConstants.allCriptoList);
     } else {
+      searchText[0].toLowerCase();
       List<BtcCripto> searchList = [];
       for (var criptoElement in BtcConstants.allCriptoList) {
         if (criptoElement.countryName[0] == searchText[0] &&
