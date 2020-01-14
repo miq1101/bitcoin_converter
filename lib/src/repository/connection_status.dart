@@ -57,18 +57,54 @@ class _ConnectionStatusBarState extends State<ConnectionStatusBar>
     super.initState();
   }
 
+  _showDialog() async {
+    showDialog<String>(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+            backgroundColor: Colors.grey[850],
+            //title: Text("Please try later",style: TextStyle(color: Colors.white)),
+            content: Container(
+              height: BtcConstants.screenHeight / 10,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Icon(
+                    Icons.error_outline,
+                    size: BtcConstants.screenHeight / 20,
+                    color: Colors.white,
+                  ),
+                  Text("Something went wrong",style: TextStyle(color: Colors.white))
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Close",style: TextStyle(color: Colors.white),),
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+              )
+            ],
+        ));
+  }
+
   _connectionChanged() async {
     _rowCount = await _repository.getRawCount();
     _listener = _dataConnectionChecker.onStatusChange.listen((status) async {
       if (status == DataConnectionStatus.connected) {
         BtcConstants.connectionStatus = true;
         if (_rowCount == 0) {
-          await _repository.getDB();
-          _rowCount = await _repository.getRawCount();
-          BtcConstants.changeCurrencyBloc.getRequests();
-          if (_isOffline == true) {
-            Navigator.pop(context);
-            _isOffline = false;
+          bool isGetDb = await _repository.getDB();
+          if (!isGetDb) {
+            await _showDialog();
+          } else {
+            _rowCount = await _repository.getRawCount();
+            BtcConstants.changeCurrencyBloc.getRequests();
+            if (_isOffline == true) {
+              Navigator.pop(context);
+              _isOffline = false;
+            }
           }
         } else {
           controller.reverse();
@@ -86,7 +122,6 @@ class _ConnectionStatusBarState extends State<ConnectionStatusBar>
           controller.forward();
         }
       }
-
     });
   }
 

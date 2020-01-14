@@ -12,22 +12,23 @@ class BtcProvider {
 
   makeGetRequestForCurrencyName() async {
     Response response = await get(BtcConstants.countryNameURL);
-    if (response.statusCode == 200) {
-      Map<String, dynamic> decoded = json.decode(response.body);
-      return decoded;
-    } else {
-      throw Exception(response.statusCode);
+    Map<String, dynamic> decoded = json.decode(response.body);
+    if (decoded.containsKey("Response")) {
+      Map<String, dynamic> errorResponse = {};
+      return errorResponse;
     }
+    return decoded;
   }
 
   makeGetRequestCurrencyInfo(String currencyCode) async {
     _criptoInfoURL = BtcConstants.criptoInfoURL + '${currencyCode}&${_apiKey}';
     Response response = await get(_criptoInfoURL);
-    if (response.statusCode == 200) {
-      Map<String, dynamic> decoded = json.decode(response.body);
-      return decoded;
-    } else {
-      throw Exception(response.statusCode);
+    Map<String, dynamic> decoded = json.decode(response.body);
+    print(decoded);
+    if (decoded.containsKey("Response")) {
+      Map<String, dynamic> errorResponse = {};
+      return errorResponse;
     }
+    return decoded;
   }
 }

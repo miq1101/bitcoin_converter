@@ -3,6 +3,8 @@ import 'package:bitcoin_converter/src/models/currency.dart';
 import 'package:bitcoin_converter/src/models/selected_type.dart';
 import 'package:bitcoin_converter/src/provider/provider.dart';
 import 'package:bitcoin_converter/src/utils/constants.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class BtcRepository {
   DatabaseHelper _db;
@@ -16,17 +18,20 @@ class BtcRepository {
     _net = BtcProvider();
   }
 
-
   getDB() async {
     BtcSelectedType _selectedType = BtcSelectedType();
     String topMoneyType;
     String bottomMoneyType;
     int rowCount = await _db.getRawCount();
     if (rowCount == 0) {
-      await getCurrencyAndCountryName();
-      BtcSelectedType selectedType =
-      BtcSelectedType(firstSelected: "BTC", secondSelected: "AMD");
-      await insertSelectedValue(selectedType);
+      bool isGetInfo = await getCurrencyAndCountryName();
+      if (isGetInfo) {
+        BtcSelectedType selectedType =
+            BtcSelectedType(firstSelected: "BTC", secondSelected: "AMD");
+        await insertSelectedValue(selectedType);
+      } else {
+        return false;
+      }
     } else {
       upDateDB();
     }
@@ -35,30 +40,43 @@ class BtcRepository {
     bottomMoneyType = _selectedType.secondSelected;
     BtcCripto topCriptoInfo = await getCriptoInfoViaMoneyType(topMoneyType);
     BtcCripto bottomCriptoInfo =
-    await getCriptoInfoViaMoneyType(bottomMoneyType);
+        await getCriptoInfoViaMoneyType(bottomMoneyType);
     BtcConstants.firstValue = topCriptoInfo.value;
     BtcConstants.secondValue = bottomCriptoInfo.value;
+    return true;
   }
 
   getCurrencyAndCountryName() async {
-    String currencyCode = '';
+    String currencyCodeStart = '';
+    String currencyCodeEnd = '';
     Map<String, dynamic> currensyAndCountry =
-    await _net.makeGetRequestForCurrencyName();
+        await _net.makeGetRequestForCurrencyName();
+    if (currensyAndCountry.isEmpty) {
+      return false;
+    }
     for (var currencyCodes in currensyAndCountry.keys) {
       _allCurrencyCodes.add(currencyCodes);
     }
     _allCountryNames = currensyAndCountry;
     int count = _allCurrencyCodes.length;
-    currencyCode = await cutListFirst(count, _allCurrencyCodes);
-    await getCriptoCurrencyInfo(currencyCode);
-    currencyCode = await cutListSecond(count, _allCurrencyCodes);
-    await getCriptoCurrencyInfo(currencyCode);
+    currencyCodeStart = await cutListFirst(count, _allCurrencyCodes);
+    currencyCodeEnd = await cutListSecond(count, _allCurrencyCodes);
+    bool isGetFirstInfo = await getCriptoCurrencyInfo(currencyCodeStart);
+    bool isGetSecondInfo = await getCriptoCurrencyInfo(currencyCodeEnd);
+    if(!isGetFirstInfo || !isGetSecondInfo){
+      return false;
+    }
+    return true;
   }
 
   getCriptoCurrencyInfo(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
-    await _net.makeGetRequestCurrencyInfo(currencyCode);
+        await _net.makeGetRequestCurrencyInfo(currencyCode);
+    if(criptoCurrencyInfo.isEmpty){
+      return false;
+    }
     await insertDB(criptoCurrencyInfo);
+    return true;
   }
 
   insertDB(Map<String, dynamic> criptoCurrencyInfo) async {
@@ -102,8 +120,10 @@ class BtcRepository {
 
   getCriptoCurrencyInfoForUpdate(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
-    await _net.makeGetRequestCurrencyInfo(currencyCode);
-    upDateCripto(criptoCurrencyInfo);
+        await _net.makeGetRequestCurrencyInfo(currencyCode);
+    if(criptoCurrencyInfo.isNotEmpty){
+      upDateCripto(criptoCurrencyInfo);
+    }
   }
 
   createMapforUpdate(num value) {
@@ -113,21 +133,21 @@ class BtcRepository {
   }
 
   upDateCripto(Map<String, dynamic> criptoCurrencyInfo) async {
-  for (String everyCurrency in criptoCurrencyInfo.keys) {
-  await _db.updateCripto(
-  everyCurrency, createMapforUpdate(criptoCurrencyInfo[everyCurrency]));
-  }
+    for (String everyCurrency in criptoCurrencyInfo.keys) {
+      await _db.updateCripto(
+          everyCurrency, createMapforUpdate(criptoCurrencyInfo[everyCurrency]));
+    }
   }
 
   upDateDB() async {
-      List currencyNames = [];
-      String currencyName = '';
-      int rowCount = await _db.getRawCount();
-      currencyNames = await getCurrencynamesForURL(rowCount);
-      currencyName = cutListFirst(currencyNames.length, currencyNames);
-      await getCriptoCurrencyInfoForUpdate(currencyName);
-      currencyName = cutListSecond(currencyNames.length, currencyNames);
-      await getCriptoCurrencyInfoForUpdate(currencyName);
+    List currencyNames = [];
+    String currencyName = '';
+    int rowCount = await _db.getRawCount();
+    currencyNames = await getCurrencynamesForURL(rowCount);
+    currencyName = cutListFirst(currencyNames.length, currencyNames);
+    await getCriptoCurrencyInfoForUpdate(currencyName);
+    currencyName = cutListSecond(currencyNames.length, currencyNames);
+    await getCriptoCurrencyInfoForUpdate(currencyName);
   }
 
   getCriptoColumnInfo(int id, String columnName) async {

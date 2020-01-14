@@ -118,7 +118,7 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
   }
 
   void updateDb() async {
-    repository.upDateDB();
+    repository.getDB();
 
     exchangeSink.add(null);
     allListSink.add(null);

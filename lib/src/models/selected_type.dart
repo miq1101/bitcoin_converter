@@ -6,8 +6,8 @@ class BtcSelectedType {
 
   factory BtcSelectedType.fromJson(Map<String, dynamic> json) =>
       BtcSelectedType(
-        firstSelected: json["firstSelected"],
-        secondSelected: json["secondSelected"],
+        firstSelected: json["firstSelected"] as String,
+        secondSelected: json["secondSelected"] as String,
       );
 
   Map<String, dynamic> toJson() => {

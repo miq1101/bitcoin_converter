@@ -142,7 +142,12 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
           if (snapshot.data == null) {
             return Container(
               child: Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                    strokeWidth: 3.0,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFFed6f0e),
+                    )
+                ),
               ),
             );
           } else if (snapshot.data.isEmpty) {
@@ -230,7 +235,11 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
         if (snapshot.data == null) {
           return Container(
             child: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                  strokeWidth: 3.0,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Color(0xFFed6f0e),
+                  )),
             ),
           );
         } else {
@@ -290,7 +299,12 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
         if (snapshot.data == null) {
           return Container(
             child: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                  strokeWidth: 3.0,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Color(0xFFed6f0e),
+                  )
+              ),
             ),
           );
         } else {
@@ -355,7 +369,12 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
           if (snapshot.data == null) {
             return Container(
               child: Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                    strokeWidth: 3.0,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFFed6f0e),
+                    )
+                ),
               ),
             );
           } else {
@@ -449,13 +468,11 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
     super.initState();
   }
 
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       if (BtcConstants.connectionStatus) {
         BtcConstants.changeCurrencyBloc.updateDb();
-      print("########################");
       }
     }
     super.didChangeAppLifecycleState(state);
