@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bitcoin_converter/src/bloc/base_bloc.dart';
 import 'package:bitcoin_converter/src/models/currency.dart';
+import 'package:bitcoin_converter/src/models/selected_type.dart';
 import 'package:bitcoin_converter/src/utils/constants.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -82,12 +83,31 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
     double topValue = BtcConstants.firstValue;
     double bottomValue = BtcConstants.secondValue;
     double parseValue = double.tryParse(value) ?? -1;
-    if(parseValue == -1){
+    if (parseValue == -1) {
       addExchangeValue.add(parseValue.toString());
-    }else {
+    } else {
       double finalValue = parseValue * bottomValue / topValue;
       addExchangeValue.add(finalValue.toString());
     }
+  }
+
+  replaceCurrency() async {
+    BtcSelectedType selectedForReplace = await getSelectedValue();
+    updateSelectedValue({"firstSelected": selectedForReplace.secondSelected});
+    BtcConstants.firstValue =
+       await getValueViaMoneyType(selectedForReplace.secondSelected);
+
+    updateSelectedValue({"secondSelected": selectedForReplace.firstSelected});
+    BtcConstants.secondValue =
+       await getValueViaMoneyType(selectedForReplace.firstSelected);
+
+    firstSink.add(null);
+    secondSink.add(null);
+    exchangeSink.add(null);
+    updateSelectedValue({
+      "firstSelected": selectedForReplace.secondSelected,
+      "secondSelected": selectedForReplace.firstSelected
+    });
   }
 
   void updateValue(data) async {
@@ -135,6 +155,10 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
 
   getSelectedValue() async {
     return await repository.getSelectedValueInfo();
+  }
+
+  getValueViaMoneyType(String moneyType) async {
+    return (await repository.getCriptoInfoViaMoneyType(moneyType)).value;
   }
 
   addSink(String position) {

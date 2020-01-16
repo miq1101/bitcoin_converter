@@ -146,8 +146,7 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
                     strokeWidth: 3.0,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Color(0xFFed6f0e),
-                    )
-                ),
+                    )),
               ),
             );
           } else if (snapshot.data.isEmpty) {
@@ -303,8 +302,7 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
                   strokeWidth: 3.0,
                   valueColor: AlwaysStoppedAnimation<Color>(
                     Color(0xFFed6f0e),
-                  )
-              ),
+                  )),
             ),
           );
         } else {
@@ -342,6 +340,24 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
         });
   }
 
+  _replaceCurrency()  {
+    return Container(
+      alignment: Alignment.bottomRight,
+      margin: EdgeInsets.only(right: BtcConstants.screenWidth / 16),
+      height: BtcConstants.screenHeight / 15,
+      child: IconButton(
+        icon: Icon(
+          Icons.import_export,
+          color: Colors.grey,
+          size: BtcConstants.screenHeight / 20,
+        ),
+        onPressed: () async{
+          await BtcConstants.changeCurrencyBloc.replaceCurrency();
+        },
+      ),
+    );
+  }
+
   Widget _btcExchangeScreen() {
     return Container(
       color: Colors.grey[900],
@@ -351,7 +367,7 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
             SizedBox(height: BtcConstants.screenHeight / 20),
             _topCurrency(),
             _topTextField(),
-            SizedBox(height: BtcConstants.screenHeight / 10),
+            _replaceCurrency(),
             _bottomCurrency(),
             _bottomTextField()
           ],
@@ -373,8 +389,7 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
                     strokeWidth: 3.0,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Color(0xFFed6f0e),
-                    )
-                ),
+                    )),
               ),
             );
           } else {
@@ -391,6 +406,15 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
                       style: TextStyle(color: Colors.grey)),
                   trailing: Text(snapshot.data[index].value.toString(),
                       style: TextStyle(color: Colors.white)),
+                  onTap: () async {
+                    BtcConstants.changeCurrencyBloc.updateSelectedValue(
+                        {"firstSelected": snapshot.data[index].moneyType});
+                    BtcConstants.firstValue = snapshot.data[index].value;
+
+                    BtcConstants.changeCurrencyBloc.firstSink.add(null);
+                    BtcConstants.changeCurrencyBloc.exchangeSink.add(null);
+                    _pageController.jumpTo(0);
+                  },
                 );
               },
             );

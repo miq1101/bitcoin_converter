@@ -21,7 +21,7 @@ class BtcProvider {
   }
 
   makeGetRequestCurrencyInfo(String currencyCode) async {
-    _criptoInfoURL = BtcConstants.criptoInfoURL + '${currencyCode}&${_apiKey}';
+    _criptoInfoURL = BtcConstants.criptoInfoURL + '${currencyCode}${_apiKey}';
     Response response = await get(_criptoInfoURL);
     Map<String, dynamic> decoded = json.decode(response.body);
     print(decoded);
