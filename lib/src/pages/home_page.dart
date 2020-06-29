@@ -20,17 +20,18 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
   String _home;
   String _list;
   Timer _timer;
-  int _startTimer;
+  double bottom;
+
   Widget _appBar() {
     return AppBar(
       leading: Container(
           padding: EdgeInsets.all(10.0),
-          child: Image.asset("assets/Logo.png", color: Colors.white)),
-      title: Text("Bitcoin converter"),
+          child: Image.asset(BtcConstants.strings.logo, color: BtcConstants.colors.white)),
+      title: Text(BtcConstants.strings.title),
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.refresh),
-          color: Colors.white,
+          color: BtcConstants.colors.white,
           onPressed: () {
             if (BtcConstants.connectionStatus) {
               BtcConstants.changeCurrencyBloc.updateDb();
@@ -46,16 +47,24 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
         icon: icon,
         title: Text(
           text,
-          style: TextStyle(color: Colors.white),
+          style: BtcConstants.textStyles.primaryTextStyle,
+        ));
+  }
+
+  Widget _createCircularProgressIndicator() {
+    return CircularProgressIndicator(
+        strokeWidth: 3.0,
+        valueColor: AlwaysStoppedAnimation<Color>(
+          BtcConstants.colors.primaryColor,
         ));
   }
 
   Widget noConnectDialog() {
     return AlertDialog(
-      title: Text("No connection"),
+      title: Text(BtcConstants.strings.noConnection),
       actions: <Widget>[
         FlatButton(
-          child: Text("OK"),
+          child: Text(BtcConstants.strings.ok),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -74,12 +83,12 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
     return Container(
       height: BtcConstants.screenHeight / 18.32,
       decoration: BoxDecoration(
-          color: Colors.grey[900],
-          border: Border.all(color: Colors.grey[900]),
+          color: BtcConstants.colors.darkGray,
+          border: Border.all(color: BtcConstants.colors.darkGray),
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20.0), topRight: Radius.circular(20.0))),
       child: Divider(
-        color: Colors.white,
+        color: BtcConstants.colors.white,
         height: BtcConstants.screenHeight / 284,
         indent: BtcConstants.screenWidth / 2.37,
         endIndent: BtcConstants.screenWidth / 2.37,
@@ -89,28 +98,28 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
 
   Widget _searchField() {
     return Container(
-      color: Colors.grey[900],
+      color: BtcConstants.colors.darkGray,
       height: BtcConstants.screenHeight / 9,
       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: TextField(
-        style: TextStyle(fontSize: 16, color: Colors.white),
+        style: BtcConstants.textStyles.white16,
         controller: _searchController,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
-              color: Colors.white,
+              color: BtcConstants.colors.white,
             ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+            borderSide: BorderSide(color: BtcConstants.colors.primaryColor),
           ),
           suffixIcon: Icon(
             Icons.search,
-            color: Colors.white,
+            color: BtcConstants.colors.white,
           ),
           border: InputBorder.none,
-          hintText: "Search country...",
-          hintStyle: TextStyle(color: Colors.white),
+          hintText: BtcConstants.strings.searchCountry,
+          hintStyle: BtcConstants.textStyles.primaryTextStyle,
           contentPadding: const EdgeInsets.only(
             left: 16,
             right: 20,
@@ -131,10 +140,53 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _listForSelect(String position) {
-    double bottom = MediaQuery.of(context).viewInsets.bottom;
+  Widget _itemExistContainer() {
     return Container(
-      color: Colors.white,
+      color: BtcConstants.colors.darkGray,
+      width: BtcConstants.screenWidth,
+      alignment: Alignment.topCenter,
+      child: Text(
+        BtcConstants.strings.noItemFound,
+        style: BtcConstants.textStyles.primaryTextStyle,
+      ),
+    );
+  }
+
+  Widget _itemListForSelect(AsyncSnapshot snapshot, String position) {
+    return Container(
+      color: BtcConstants.colors.darkGray,
+      padding: EdgeInsets.only(bottom: bottom),
+      child: ListView.builder(
+        itemCount: snapshot.data.length,
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+              leading: Image.asset(snapshot.data[index].flagPath),
+              title: Text(snapshot.data[index].moneyType,
+                  style: BtcConstants.textStyles.primaryTextStyle),
+              subtitle: Text(snapshot.data[index].countryName,
+                  style: BtcConstants.textStyles.primaryTextStyle),
+              onTap: () async {
+                if (position == BtcConstants.strings.top) {
+                  BtcConstants.changeCurrencyBloc.updateSelectedValue(
+                      {BtcConstants.strings.firstSelected: snapshot.data[index].moneyType});
+                  BtcConstants.firstValue = snapshot.data[index].value;
+                } else {
+                  BtcConstants.changeCurrencyBloc.updateSelectedValue(
+                      {BtcConstants.strings.secondSelected: snapshot.data[index].moneyType});
+                  BtcConstants.secondValue = snapshot.data[index].value;
+                }
+                BtcConstants.changeCurrencyBloc.addSink(position);
+                BtcConstants.changeCurrencyBloc.exchangeSink.add(null);
+                Navigator.pop(context);
+              });
+        },
+      ),
+    );
+  }
+
+  Widget _listForSelect(String position) {
+    return Container(
+      color: BtcConstants.colors.white,
       height: BtcConstants.screenHeight - BtcConstants.screenHeight / 3.8,
       child: StreamBuilder(
         stream: BtcConstants.changeCurrencyBloc.listSelect,
@@ -142,55 +194,13 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
           if (snapshot.data == null) {
             return Container(
               child: Center(
-                child: CircularProgressIndicator(
-                    strokeWidth: 3.0,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0xFFed6f0e),
-                    )),
+                child: _createCircularProgressIndicator(),
               ),
             );
           } else if (snapshot.data.isEmpty) {
-            return Container(
-              color: Colors.grey[900],
-              width: BtcConstants.screenWidth,
-              alignment: Alignment.topCenter,
-              child: Text(
-                "No item found",
-                style: TextStyle(color: Colors.white),
-              ),
-            );
+            return _itemExistContainer();
           } else {
-            return Container(
-              color: Colors.grey[900],
-              padding: EdgeInsets.only(bottom: bottom),
-              child: ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                      leading: Image.asset(snapshot.data[index].flagPath),
-                      title: Text(snapshot.data[index].moneyType,
-                          style: TextStyle(color: Colors.white)),
-                      subtitle: Text(snapshot.data[index].countryName,
-                          style: TextStyle(color: Colors.grey)),
-                      onTap: () async {
-                        if (position == "top") {
-                          BtcConstants.changeCurrencyBloc.updateSelectedValue({
-                            "firstSelected": snapshot.data[index].moneyType
-                          });
-                          BtcConstants.firstValue = snapshot.data[index].value;
-                        } else {
-                          BtcConstants.changeCurrencyBloc.updateSelectedValue({
-                            "secondSelected": snapshot.data[index].moneyType
-                          });
-                          BtcConstants.secondValue = snapshot.data[index].value;
-                        }
-                        BtcConstants.changeCurrencyBloc.addSink(position);
-                        BtcConstants.changeCurrencyBloc.exchangeSink.add(null);
-                        Navigator.pop(context);
-                      });
-                },
-              ),
-            );
+            return _itemListForSelect(snapshot, position);
           }
         },
       ),
@@ -220,7 +230,7 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
         BtcConstants.changeCurrencyBloc.allListForSelectSink.add(null);
         showModalBottomSheet<Null>(
             isScrollControlled: true,
-            backgroundColor: Colors.transparent,
+            backgroundColor: BtcConstants.colors.transparent,
             context: context,
             builder: (BuildContext context) => _bottomSheet(position));
       },
@@ -234,22 +244,18 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
         if (snapshot.data == null) {
           return Container(
             child: Center(
-              child: CircularProgressIndicator(
-                  strokeWidth: 3.0,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Color(0xFFed6f0e),
-                  )),
+              child: _createCircularProgressIndicator(),
             ),
           );
         } else {
           return _listTile(
               Image.asset(snapshot.data.flagPath),
               Text(snapshot.data.moneyType,
-                  style: TextStyle(color: Colors.white)),
+                  style: BtcConstants.textStyles.primaryTextStyle),
               Text(snapshot.data.countryName,
-                  style: TextStyle(color: Colors.grey)),
+                  style: BtcConstants.textStyles.primaryTextStyle),
               context,
-              "top");
+              BtcConstants.strings.top);
         }
       },
     );
@@ -264,18 +270,18 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
                 left: BtcConstants.screenWidth / 16,
                 right: BtcConstants.screenWidth / 16),
             child: TextField(
-              style: TextStyle(color: Colors.white),
+              style: BtcConstants.textStyles.primaryTextStyle,
               maxLength: 9,
               decoration: InputDecoration(
                   enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey)),
+                      borderSide: BorderSide(color: BtcConstants.colors.gray)),
                   counter: Offstage(),
                   hintText: _selectedValue,
-                  hintStyle: TextStyle(color: Colors.white),
+                  hintStyle: BtcConstants.textStyles.primaryTextStyle,
                   helperText: snapshot.data == "-1.0"
-                      ? "Please input correct number"
+                      ? BtcConstants.strings.incorrectNumber
                       : "",
-                  helperStyle: TextStyle(color: Colors.red)),
+                  helperStyle: BtcConstants.textStyles.red14),
               controller: _myController,
               keyboardType: TextInputType.number,
               onChanged: (value) {
@@ -298,22 +304,18 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
         if (snapshot.data == null) {
           return Container(
             child: Center(
-              child: CircularProgressIndicator(
-                  strokeWidth: 3.0,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Color(0xFFed6f0e),
-                  )),
+              child: _createCircularProgressIndicator(),
             ),
           );
         } else {
           return _listTile(
               Image.asset(snapshot.data.flagPath),
               Text(snapshot.data?.moneyType,
-                  style: TextStyle(color: Colors.white)),
+                  style: BtcConstants.textStyles.primaryTextStyle),
               Text(snapshot.data?.countryName,
-                  style: TextStyle(color: Colors.grey)),
+                  style: BtcConstants.textStyles.gray14),
               context,
-              "bottom");
+              BtcConstants.strings.bottom);
         }
       },
     );
@@ -330,9 +332,9 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
             child: TextField(
               decoration: InputDecoration(
                 disabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
+                    borderSide: BorderSide(color: BtcConstants.colors.white)),
                 hintText: snapshot.data == "-1.0" ? "0.0" : snapshot.data,
-                hintStyle: TextStyle(color: Colors.white),
+                hintStyle: BtcConstants.textStyles.primaryTextStyle,
               ),
               enabled: false,
             ),
@@ -340,7 +342,7 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
         });
   }
 
-  _replaceCurrency()  {
+  _replaceCurrency() {
     return Container(
       alignment: Alignment.bottomRight,
       margin: EdgeInsets.only(right: BtcConstants.screenWidth / 16),
@@ -348,10 +350,10 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
       child: IconButton(
         icon: Icon(
           Icons.import_export,
-          color: Colors.grey,
+          color:BtcConstants.colors.gray,
           size: BtcConstants.screenHeight / 20,
         ),
-        onPressed: () async{
+        onPressed: () async {
           await BtcConstants.changeCurrencyBloc.replaceCurrency();
         },
       ),
@@ -360,7 +362,7 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
 
   Widget _btcExchangeScreen() {
     return Container(
-      color: Colors.grey[900],
+      color: BtcConstants.colors.darkGray,
       child: Center(
         child: ListView(
           children: <Widget>[
@@ -376,48 +378,48 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
     );
   }
 
+  Widget _createAllCriptoList(AsyncSnapshot snapshot) {
+    return ListView.builder(
+      itemCount: snapshot.data.length,
+      itemBuilder: (BuildContext context, int index) {
+        return ListTile(
+          leading: Image.asset(snapshot.data[index].flagPath),
+          title: Text(
+            snapshot.data[index].moneyType,
+            style: BtcConstants.textStyles.primaryTextStyle,
+          ),
+          subtitle: Text(snapshot.data[index].countryName,
+              style: BtcConstants.textStyles.gray14),
+          trailing: Text(snapshot.data[index].value.toString(),
+              style: BtcConstants.textStyles.primaryTextStyle),
+          onTap: () async {
+            BtcConstants.changeCurrencyBloc.updateSelectedValue(
+                {BtcConstants.strings.firstSelected: snapshot.data[index].moneyType});
+            BtcConstants.firstValue = snapshot.data[index].value;
+
+            BtcConstants.changeCurrencyBloc.firstSink.add(null);
+            BtcConstants.changeCurrencyBloc.exchangeSink.add(null);
+            _pageController.jumpTo(0);
+          },
+        );
+      },
+    );
+  }
+
   Widget _btcAllCriptoList() {
     return Container(
-      color: Colors.grey[900],
+      color: BtcConstants.colors.darkGray,
       child: StreamBuilder(
         stream: BtcConstants.changeCurrencyBloc.list,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.data == null) {
             return Container(
               child: Center(
-                child: CircularProgressIndicator(
-                    strokeWidth: 3.0,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0xFFed6f0e),
-                    )),
+                child: _createCircularProgressIndicator(),
               ),
             );
           } else {
-            return ListView.builder(
-              itemCount: snapshot.data.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  leading: Image.asset(snapshot.data[index].flagPath),
-                  title: Text(
-                    snapshot.data[index].moneyType,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  subtitle: Text(snapshot.data[index].countryName,
-                      style: TextStyle(color: Colors.grey)),
-                  trailing: Text(snapshot.data[index].value.toString(),
-                      style: TextStyle(color: Colors.white)),
-                  onTap: () async {
-                    BtcConstants.changeCurrencyBloc.updateSelectedValue(
-                        {"firstSelected": snapshot.data[index].moneyType});
-                    BtcConstants.firstValue = snapshot.data[index].value;
-
-                    BtcConstants.changeCurrencyBloc.firstSink.add(null);
-                    BtcConstants.changeCurrencyBloc.exchangeSink.add(null);
-                    _pageController.jumpTo(0);
-                  },
-                );
-              },
-            );
+            return _createAllCriptoList(snapshot);
           }
         },
       ),
@@ -456,7 +458,7 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
 
   Widget _bottomBar() {
     return BottomNavigationBar(
-      backgroundColor: Color(0xFFed6f0e),
+      backgroundColor: BtcConstants.colors.primaryColor,
       items: <BottomNavigationBarItem>[
         bottomNavigationBarItem(_homeIcon, _home),
         bottomNavigationBarItem(_listIcon, _list),
@@ -468,7 +470,6 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
 
   void initState() {
     _selectedValue = "0.0";
-    _startTimer = 10;
     _connectionStatusBar = ConnectionStatusBar();
     WidgetsBinding.instance.addObserver(this);
 
@@ -480,14 +481,14 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
     _bottomSelectedIndex = 0;
     _homeIcon = Icon(
       Icons.home,
-      color: Colors.white,
+      color: BtcConstants.colors.white,
     );
     _listIcon = Icon(
       Icons.list,
-      color: Colors.white,
+      color: BtcConstants.colors.white,
     );
-    _home = "Home";
-    _list = "All list";
+    _home = BtcConstants.strings.home;
+    _list = BtcConstants.strings.allList;
 
     super.initState();
   }
@@ -517,6 +518,7 @@ class _BtcHomePageState extends State<BtcHomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     BtcConstants.screenHeight = MediaQuery.of(context).size.height;
     BtcConstants.screenWidth = MediaQuery.of(context).size.width;
+    bottom = MediaQuery.of(context).viewInsets.bottom;
 
     return SafeArea(
         child: Scaffold(

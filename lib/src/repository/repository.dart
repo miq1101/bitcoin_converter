@@ -3,8 +3,6 @@ import 'package:bitcoin_converter/src/models/currency.dart';
 import 'package:bitcoin_converter/src/models/selected_type.dart';
 import 'package:bitcoin_converter/src/provider/provider.dart';
 import 'package:bitcoin_converter/src/utils/constants.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 class BtcRepository {
   DatabaseHelper _db;
@@ -63,7 +61,7 @@ class BtcRepository {
     currencyCodeEnd = await cutListSecond(count, _allCurrencyCodes);
     bool isGetFirstInfo = await getCriptoCurrencyInfo(currencyCodeStart);
     bool isGetSecondInfo = await getCriptoCurrencyInfo(currencyCodeEnd);
-    if(!isGetFirstInfo || !isGetSecondInfo){
+    if (!isGetFirstInfo || !isGetSecondInfo) {
       return false;
     }
     return true;
@@ -72,7 +70,7 @@ class BtcRepository {
   getCriptoCurrencyInfo(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
         await _net.makeGetRequestCurrencyInfo(currencyCode);
-    if(criptoCurrencyInfo.isEmpty){
+    if (criptoCurrencyInfo.isEmpty) {
       return false;
     }
     await insertDB(criptoCurrencyInfo);
@@ -121,7 +119,7 @@ class BtcRepository {
   getCriptoCurrencyInfoForUpdate(String currencyCode) async {
     Map<String, dynamic> criptoCurrencyInfo =
         await _net.makeGetRequestCurrencyInfo(currencyCode);
-    if(criptoCurrencyInfo.isNotEmpty){
+    if (criptoCurrencyInfo.isNotEmpty) {
       upDateCripto(criptoCurrencyInfo);
     }
   }

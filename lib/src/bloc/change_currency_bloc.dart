@@ -93,11 +93,11 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
 
   replaceCurrency() async {
     BtcSelectedType selectedForReplace = await getSelectedValue();
-    updateSelectedValue({"firstSelected": selectedForReplace.secondSelected});
+    updateSelectedValue({BtcConstants.strings.firstSelected: selectedForReplace.secondSelected});
     BtcConstants.firstValue =
        await getValueViaMoneyType(selectedForReplace.secondSelected);
 
-    updateSelectedValue({"secondSelected": selectedForReplace.firstSelected});
+    updateSelectedValue({BtcConstants.strings.secondSelected: selectedForReplace.firstSelected});
     BtcConstants.secondValue =
        await getValueViaMoneyType(selectedForReplace.firstSelected);
 
@@ -162,7 +162,7 @@ class BtcChangeCurrencyBloc extends BtcBaseBloc {
   }
 
   addSink(String position) {
-    if (position == "top") {
+    if (position == BtcConstants.strings.top) {
       firstSink.add(null);
     } else {
       secondSink.add(null);

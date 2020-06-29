@@ -63,7 +63,6 @@ class _ConnectionStatusBarState extends State<ConnectionStatusBar>
         context: context,
         builder: (BuildContext context) => AlertDialog(
             backgroundColor: Colors.grey[850],
-            //title: Text("Please try later",style: TextStyle(color: Colors.white)),
             content: Container(
               height: BtcConstants.screenHeight / 10,
               child: Column(
@@ -72,15 +71,15 @@ class _ConnectionStatusBarState extends State<ConnectionStatusBar>
                   Icon(
                     Icons.error_outline,
                     size: BtcConstants.screenHeight / 20,
-                    color: Colors.white,
+                    color: BtcConstants.colors.white,
                   ),
-                  Text("Something went wrong",style: TextStyle(color: Colors.white))
+                  Text(BtcConstants.strings.wrong,style: BtcConstants.textStyles.primaryTextStyle)
                 ],
               ),
             ),
             actions: <Widget>[
               FlatButton(
-                child: Text("Close",style: TextStyle(color: Colors.white),),
+                child: Text(BtcConstants.strings.close,style: BtcConstants.textStyles.primaryTextStyle,),
                 onPressed: (){
                   Navigator.pop(context);
                 },
@@ -111,7 +110,6 @@ class _ConnectionStatusBarState extends State<ConnectionStatusBar>
         }
       } else {
         BtcConstants.connectionStatus = false;
-        print(_rowCount);
         if (_rowCount == 0) {
           Navigator.push(
               context,

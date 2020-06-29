@@ -9,6 +9,6 @@ void main() async {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     home: BtcHomePage(),
-    theme: ThemeData(primaryColor: Color(0xFFed6f0e)),
+    theme: ThemeData(primaryColor: BtcConstants.colors.primaryColor),
   ));
 }
