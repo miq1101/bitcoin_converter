@@ -1,16 +1,55 @@
-# bitcoin_converter
+#
+## About the project
 
-A new Flutter project.
 
-## Getting Started
+Home Page
 
-This project is a starting point for a Flutter application.
+<img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/homePage.jpg" width="250" height="430">  <img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/convert.jpg" width="250" height="430">
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Search Page
+
+<img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/searchPage.jpg" width="250" height="430">  <img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/searchCountry.jpg" width="250" height="430">
+
+All Currency List
+
+<img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/allList.jpg" width="250" height="430">
+
+## Introduction to the developer
+
+## Download & install
+
+First, clone the repository with the 'clone' command, or just download the zip.
+
+$ git clone https://github.com/miq1101/auth.git
+
+Then, download either Android Studio or Visual Studio Code, with their respective [Flutter editor plugins](https://flutter.dev/docs/get-started/editor). For more information about Flutter installation procedure, check the [official install guide](https://flutter.dev/docs/get-started/install).
+
+Install dependencies from pubspec.yaml by running flutter packages get from the project root (see [using packages documentation](https://flutter.dev/docs/development/packages-and-plugins/using-packages#adding-a-package-dependency-to-an-app) for details and how to do this in the editor).
+
+## Built with
+
+•[Flutter](https://flutter.dev/)
+
+•[Android Studio](https://developer.android.com/studio/index.html/)
+
+•[Visual Studio Code](https://code.visualstudio.com/)
+
+## Packages
+
+[sqflite](https://pub.dev/packages/sqflite)
+
+[http](https://pub.dev/packages/http)
+
+[path](https://pub.dev/packages/path)
+
+[path_provider](https://pub.dev/packages/path_provider)
+
+[connectivity](https://pub.dev/packages/connectivity)
+
+[rxdart](https://pub.dev/packages/rxdart)
+
+
+
+

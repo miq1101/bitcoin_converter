@@ -23,8 +23,6 @@ dependencies:
   sqflite: ^1.1.6+4
   path: ^1.6.2
   path_provider: ^1.2.0
-  country_code_picker: ^1.1.7
-  currency_icons: ^0.0.2
   connectivity: ^0.4.4
   rxdart: ^0.22.1
 
