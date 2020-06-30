@@ -4,17 +4,17 @@
 
 Home Page
 
-<img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/homePage.jpg" width="250" height="430">  <img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/convert.jpg" width="250" height="430">
+<img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/homePage.jpg" width="350" height="600">  <img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/convert.jpg" width="350" height="600">
 
 
 
 Search Page
 
-<img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/searchPage.jpg" width="250" height="430">  <img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/searchCountry.jpg" width="250" height="430">
+<img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/searchPage.jpg" width="350" height="600">  <img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/searchCountry.jpg" width="350" height="600">
 
 All Currency List
 
-<img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/allList.jpg" width="250" height="430">
+<img src="https://github.com/miq1101/bitcoin_converter/tree/master/assets/allList.jpg" width="350" height="600">
 
 ## Introduction to the developer
 
