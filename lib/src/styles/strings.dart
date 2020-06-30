@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+
 
 ///Creates all the texts which are used in app.
 class AppStrings {
