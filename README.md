@@ -22,7 +22,7 @@ All Currency List
 
 First, clone the repository with the 'clone' command, or just download the zip.
 
-$ git clone https://github.com/miq1101/auth.git
+$ git clone https://github.com/miq1101/bitcoin_converter
 
 Then, download either Android Studio or Visual Studio Code, with their respective [Flutter editor plugins](https://flutter.dev/docs/get-started/editor). For more information about Flutter installation procedure, check the [official install guide](https://flutter.dev/docs/get-started/install).
 
