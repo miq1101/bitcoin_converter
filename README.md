@@ -1,6 +1,8 @@
 #
 ## About the project
 
+Mobile application for displaying the value of more than 100 currencies and precious metals based on Bitcoin.
+
 
 Home Page
 
